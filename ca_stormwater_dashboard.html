@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>California Stormwater Overflow & Compliance Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#0c1222;--surface:#151d30;--surface2:#1e2a42;--border:#2d3a52;--text:#e0e7f1;--dim:#7b8ba5;
+    --accent:#60a5fa;--safe:#22c55e;--filling:#3b82f6;--warning:#f59e0b;--critical:#ef4444;--overflow:#dc2626;
+    --compliant:#22c55e;--atrisk:#f59e0b;--noncompliant:#ef4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+  .topbar h1{font-size:16px;font-weight:700;color:var(--accent)}
+  .topbar .ca-badge{background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+  .topbar .live{background:var(--critical);color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:10px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .topbar-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .topbar-r select,.topbar-r .clock{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:12px}
+
+  .summary{display:flex;gap:6px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;background:var(--surface2);border-radius:10px}
+  .chip .d{width:7px;height:7px;border-radius:50%}
+  .compliance-chips{margin-left:auto;display:flex;gap:6px}
+  .cc{font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.3px}
+  .cc.compliant{background:rgba(34,197,94,.15);color:var(--compliant)}
+  .cc.atrisk{background:rgba(245,158,11,.15);color:var(--atrisk)}
+  .cc.noncompliant{background:rgba(239,68,68,.15);color:var(--noncompliant)}
+
+  .main{display:flex;flex:1;overflow:hidden}
+  .sidebar{width:320px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+  .sidebar-hdr{padding:12px 14px;border-bottom:1px solid var(--border)}
+  .sidebar-hdr h2{font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+  .pit-list{flex:1;overflow-y:auto}
+  .pit-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:10px}
+  .pit-item:hover{background:var(--surface2)}
+  .pit-item.active{background:rgba(96,165,250,.08);border-left:3px solid var(--accent)}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .dot.safe{background:var(--safe)}.dot.filling{background:var(--filling)}.dot.warning{background:var(--warning)}
+  .dot.critical{background:var(--critical);animation:pulse 1s infinite}.dot.overflow{background:var(--overflow);animation:pulse .5s infinite}
+  .pit-info{flex:1;min-width:0}
+  .pit-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pit-sub{font-size:10px;color:var(--dim)}
+  .pit-badges{display:flex;gap:3px;margin-top:3px}
+  .pit-badge{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600}
+  .pit-badge.pass{background:rgba(34,197,94,.15);color:var(--safe)}
+  .pit-badge.fail{background:rgba(239,68,68,.15);color:var(--critical)}
+  .pit-ttf{font-size:11px;font-weight:600;text-align:right;white-space:nowrap}
+  .pit-ttf.safe{color:var(--safe)}.pit-ttf.filling{color:var(--filling)}.pit-ttf.warning{color:var(--warning)}
+  .pit-ttf.critical{color:var(--critical)}.pit-ttf.overflow{color:var(--overflow)}
+
+  .map-c{flex:1;position:relative}
+  #map{width:100%;height:100%}
+  .leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:8px;border:1px solid var(--border)}
+  .leaflet-popup-tip{background:var(--surface)}
+
+  .detail{width:440px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;transition:width .2s}
+  .detail.collapsed{width:0;padding:0;border:none;overflow:hidden}
+  .detail-hdr{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between}
+  .detail-hdr h2{font-size:15px;font-weight:700}
+  .close-btn{background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer}
+  .detail-sec{padding:14px;border-bottom:1px solid var(--border)}
+  .detail-sec h3{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+
+  .status-banner{padding:14px;text-align:center}
+  .status-banner .sl{font-size:22px;font-weight:800}
+  .status-banner .tl{font-size:13px;margin-top:3px}
+  .status-banner.safe{background:rgba(34,197,94,.1);color:var(--safe)}
+  .status-banner.filling{background:rgba(59,130,246,.1);color:var(--filling)}
+  .status-banner.warning{background:rgba(245,158,11,.1);color:var(--warning)}
+  .status-banner.critical{background:rgba(239,68,68,.1);color:var(--critical)}
+  .status-banner.overflow{background:rgba(220,38,38,.15);color:var(--overflow)}
+
+  /* Compliance cards */
+  .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .comp-card{background:var(--surface2);border-radius:6px;padding:8px;border-left:3px solid var(--border)}
+  .comp-card.pass{border-left-color:var(--safe)}
+  .comp-card.fail{border-left-color:var(--critical)}
+  .comp-card .clabel{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.3px}
+  .comp-card .cval{font-size:14px;font-weight:700;margin-top:1px}
+  .comp-card .csub{font-size:10px;color:var(--dim)}
+
+  .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .spec-card{background:var(--surface2);border-radius:5px;padding:8px}
+  .spec-card .label{font-size:9px;color:var(--dim);text-transform:uppercase}
+  .spec-card .value{font-size:14px;font-weight:700;margin-top:1px}
+  .spec-card .unit{font-size:10px;color:var(--dim)}
+
+  .forecast-bars{display:flex;gap:2px;align-items:flex-end;height:55px;margin-top:6px}
+  .fbar{flex:1;border-radius:2px 2px 0 0;min-width:3px;position:relative}
+  .fbar .bl{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:7px;color:var(--dim);white-space:nowrap}
+
+  .chart-wrap{background:var(--surface2);border-radius:6px;padding:10px;margin-top:6px}
+  .chart-wrap canvas{width:100%!important}
+
+  @media(max-width:1200px){.sidebar{width:260px}.detail{width:360px}}
+  @media(max-width:900px){.main{flex-direction:column}.sidebar{width:100%;height:180px}.detail{width:100%;height:50%}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>CA Stormwater Overflow & Compliance</h1>
+  <span class="ca-badge">NPDES / MS4</span>
+  <span class="live">LIVE</span>
+  <div class="topbar-r">
+    <select id="regionSel">
+      <option value="LA">Los Angeles (R4)</option>
+      <option value="SF_BAY">San Francisco Bay (R2)</option>
+      <option value="SAN_DIEGO">San Diego (R9)</option>
+      <option value="SANTA_ANA">Santa Ana (R8)</option>
+    </select>
+    <select id="fcSel">
+      <option value="current">Current NWS Forecast</option>
+      <option value="ar">Atmospheric River</option>
+      <option value="moderate">Moderate Storm</option>
+      <option value="light">Light Rain</option>
+    </select>
+    <span id="clock" class="clock"></span>
+  </div>
+</div>
+<div class="summary" id="summaryStrip"></div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-hdr"><h2>Drain Pits (<span id="pitCount">0</span>)</h2></div>
+    <div class="pit-list" id="pitList"></div>
+  </div>
+  <div class="map-c"><div id="map"></div></div>
+  <div class="detail collapsed" id="detailPanel">
+    <div class="detail-hdr"><div><h2 id="dTitle">—</h2><div id="dSub" style="font-size:11px;color:var(--dim);margin-top:2px"></div></div><button class="close-btn" onclick="closeDetail()">&times;</button></div>
+    <div class="status-banner" id="sBanner"><div class="sl" id="sLabel">—</div><div class="tl" id="sTTF">—</div></div>
+    <div class="detail-sec"><h3>NPDES Compliance</h3><div class="comp-grid" id="compGrid"></div></div>
+    <div class="detail-sec"><h3>Drain Specifications</h3><div class="spec-grid" id="specGrid"></div></div>
+    <div class="detail-sec"><h3>Forecast Rainfall (2 hr)</h3><div class="forecast-bars" id="fcBars"></div><div style="height:16px"></div></div>
+    <div class="detail-sec"><h3>Predicted Water Level</h3><div class="chart-wrap"><canvas id="cWL"></canvas></div></div>
+    <div class="detail-sec"><h3>Inflow vs Outflow & Design Capacity</h3><div class="chart-wrap"><canvas id="cFlow"></canvas></div></div>
+    <div class="detail-sec"><h3>Time to Overflow</h3><div class="chart-wrap"><canvas id="cTTF"></canvas></div></div>
+  </div>
+</div>
+
+<script>
+// ═══ ENGINE ═══
+const G_FT=32.174, RELAY=120;
+const statusColors={safe:'#22c55e',filling:'#3b82f6',warning:'#f59e0b',critical:'#ef4444',overflow:'#dc2626'};
+
+class CAEngine {
+  constructor(c) {
+    this.W=c.w; this.D=c.d; this.L=c.l; // ft
+    this.pipeDia=c.pipeDia/12; // convert inches to ft
+    this.pipeSlope=c.pipeSlope; this.n=c.n; this.Cd=c.Cd;
+    this.A_ac=c.areaAc; this.C=c.rc; this.impPct=c.impPct;
+    this.p85=c.p85; this.p1yr=c.p1yr;
+    this.preCN=c.preCN||65; this.postCN=c.postCN||85;
+    this.SF=c.sf||0.8;
+  }
+  get pipeArea(){return Math.PI*(this.pipeDia/2)**2}
+  get hydR(){return this.pipeDia/4}
+  get drainVol(){return this.W*this.D*this.L}
+  manningQ(){return(1.486/this.n)*this.pipeArea*Math.pow(this.hydR,2/3)*Math.sqrt(this.pipeSlope)}
+  orificeQ(h){return h>0?this.Cd*this.pipeArea*Math.sqrt(2*G_FT*h):0}
+  outletQ(wl){
+    const qF=this.manningQ();
+    if(wl<=0)return 0;
+    if(wl<this.pipeDia)return qF*(wl/this.pipeDia);
+    return Math.min(this.orificeQ(wl-this.pipeDia/2),qF*1.5);
+  }
+  inflow(i_inhr){return this.C*i_inhr*this.A_ac}  // cfs (rational, US)
+
+  // CA compliance
+  wqv(){return this.C*(this.p85/12)*(this.A_ac*43560)}  // ft³
+  trashQ(){return this.C*this.p1yr*this.A_ac}  // cfs
+  hydroRatio(){return 1.2}  // simplified post/pre
+
+  compliance(){
+    const wqvReq=this.wqv(), wqvProv=this.drainVol;
+    const trashReq=this.trashQ(), outCap=this.manningQ();
+    const hydR=this.hydroRatio();
+    const wqvOk=wqvProv>=wqvReq, trashOk=outCap>=trashReq, hydOk=hydR<=1.0;
+    const violations=[];
+    if(!wqvOk)violations.push(`WQV deficit: ${Math.round(wqvReq-wqvProv)} ft³`);
+    if(!trashOk)violations.push('Trash capture undersized');
+    if(!hydOk)violations.push(`Hydromod ratio ${hydR.toFixed(2)}`);
+    let status='COMPLIANT';
+    if(violations.length>1)status='NON-COMPLIANT';
+    else if(violations.length===1)status='AT RISK';
+    return{wqvReq,wqvProv,wqvOk,trashReq,trashOk,outCap,hydR,hydOk,status,violations};
+  }
+
+  simulate(profile,substeps=20){
+    const results=[];let wl=0;const planA=this.W*this.L;const dtS=RELAY/substeps;
+    for(const[dur,intensity]of profile){
+      const nS=Math.max(1,Math.floor(dur/2));
+      for(let s=0;s<nS;s++){
+        const qIn=this.inflow(intensity);
+        for(let ss=0;ss<substeps;ss++){
+          const qOut=this.outletQ(wl);
+          const dWL=planA>0?((qIn-qOut)*dtS)/planA:0;
+          wl=Math.max(0,Math.min(wl+dWL,this.D));
+        }
+        const qOut=this.outletQ(wl);const qNet=qIn-qOut;
+        const vFree=this.W*Math.max(0,this.D-wl)*this.L*this.SF;
+        let ttf=null;
+        if(wl>=this.D)ttf=0;
+        else if(qNet>0&&vFree>0)ttf=(vFree/qNet)/60;
+        let status='safe';
+        if(wl>=this.D)status='overflow';
+        else if(ttf!==null&&ttf<=4)status='critical';
+        else if(ttf!==null&&ttf<=10)status='warning';
+        else if(qNet>0)status='filling';
+        const exceedance=this.manningQ()>0?qIn/this.manningQ():0;
+        results.push({time:results.length*2+2,wl,qIn,qOut,qNet,vFree,ttf,status,intensity,exceedance});
+      }
+    }
+    return results;
+  }
+}
+
+// ═══ REGION DATA ═══
+const REGIONS={
+  LA:{center:[34.02,-118.28],zoom:11,p85:0.75,p1yr:0.55,label:'Los Angeles (R4)',permit:'R4-2021-0105',
+    cities:{'Downtown LA':{lat:34.0407,lng:-118.2468},'Santa Monica':{lat:34.0195,lng:-118.4912},'Torrance':{lat:33.8358,lng:-118.3406},
+            'Long Beach':{lat:33.7701,lng:-118.1937},'Inglewood':{lat:33.9617,lng:-118.3531},'Culver City':{lat:34.0211,lng:-118.3965},
+            'El Segundo':{lat:33.9192,lng:-118.4165},'Hawthorne':{lat:33.9164,lng:-118.3526},'Gardena':{lat:33.8883,lng:-118.3090},
+            'Redondo Beach':{lat:33.8492,lng:-118.3884}}},
+  SF_BAY:{center:[37.56,-122.05],zoom:11,p85:0.60,p1yr:0.42,label:'San Francisco Bay (R2)',permit:'R2-2022-0018',
+    cities:{'San Jose':{lat:37.3382,lng:-121.8863},'Fremont':{lat:37.5485,lng:-121.9886},'Hayward':{lat:37.6688,lng:-122.0808},
+            'Sunnyvale':{lat:37.3688,lng:-122.0363},'Santa Clara':{lat:37.3541,lng:-121.9552},'Milpitas':{lat:37.4323,lng:-121.8996},
+            'Mountain View':{lat:37.3861,lng:-122.0839},'Palo Alto':{lat:37.4419,lng:-122.1430},'Redwood City':{lat:37.4852,lng:-122.2364},
+            'San Mateo':{lat:37.5630,lng:-122.3255}}},
+  SAN_DIEGO:{center:[32.82,-117.10],zoom:11,p85:0.52,p1yr:0.48,label:'San Diego (R9)',permit:'R9-2013-0001',
+    cities:{'San Diego':{lat:32.7157,lng:-117.1611},'Chula Vista':{lat:32.6401,lng:-117.0842},'Oceanside':{lat:33.1959,lng:-117.3795},
+            'Escondido':{lat:33.1192,lng:-117.0864},'Carlsbad':{lat:33.1581,lng:-117.3506},'El Cajon':{lat:32.7948,lng:-116.9625},
+            'Vista':{lat:33.2000,lng:-117.2425},'Encinitas':{lat:33.0370,lng:-117.2920},'La Mesa':{lat:32.7678,lng:-117.0231},
+            'National City':{lat:32.6781,lng:-117.0992}}},
+  SANTA_ANA:{center:[33.72,-117.83],zoom:11,p85:0.63,p1yr:0.52,label:'Santa Ana (R8)',permit:'R8-2009-0030',
+    cities:{'Anaheim':{lat:33.8366,lng:-117.9143},'Santa Ana':{lat:33.7455,lng:-117.8677},'Irvine':{lat:33.6846,lng:-117.8265},
+            'Huntington Beach':{lat:33.6595,lng:-117.9988},'Garden Grove':{lat:33.7743,lng:-117.9379},'Fullerton':{lat:33.8703,lng:-117.9242},
+            'Orange':{lat:33.7879,lng:-117.8531},'Costa Mesa':{lat:33.6412,lng:-117.9187},'Mission Viejo':{lat:33.6000,lng:-117.6720},
+            'Tustin':{lat:33.7458,lng:-117.8262}}},
+};
+
+const FORECASTS={
+  current:{label:'Current NWS',makeProfile:(p85)=>[
+    [10,.08],[10,.25],[10,.55],[10,.95],[10,1.4],[10,1.8],[10,1.2],[10,.65],[10,.3],[10,.1],[10,.04],[10,0]
+  ]},
+  ar:{label:'Atmospheric River',makeProfile:(p85)=>[
+    [10,.2],[10,.6],[10,1.2],[10,2.0],[10,2.8],[10,3.5],[10,2.5],[10,1.5],[10,.8],[10,.3],[10,.1],[10,0]
+  ]},
+  moderate:{label:'Moderate Storm',makeProfile:(p85)=>[
+    [10,.05],[10,.15],[10,.35],[10,.6],[10,.85],[10,.7],[10,.5],[10,.3],[10,.15],[10,.05],[10,0],[10,0]
+  ]},
+  light:{label:'Light Rain',makeProfile:(p85)=>[
+    [10,.02],[10,.08],[10,.15],[10,.25],[10,.32],[10,.25],[10,.15],[10,.08],[10,.03],[10,.01],[10,0],[10,0]
+  ]},
+};
+
+// ═══ PIT GENERATION ═══
+const PIT_CONFIGS=[
+  {suffix:'Main St & 1st Ave',w:4,d:3,l:50,pipeDia:18,pipeSlope:.005,n:.012,Cd:.62,areaAc:6.2,rc:.85,impPct:78,preCN:65,postCN:85},
+  {suffix:'Highway 101 Median',w:6,d:4,l:80,pipeDia:24,pipeSlope:.004,n:.011,Cd:.65,areaAc:10.5,rc:.88,impPct:85,preCN:60,postCN:88},
+  {suffix:'Industrial Blvd Catch Basin',w:3.5,d:2.5,l:40,pipeDia:15,pipeSlope:.006,n:.013,Cd:.60,areaAc:4.5,rc:.82,impPct:72,preCN:68,postCN:82},
+  {suffix:'Civic Center Storm Drain',w:8,d:5,l:100,pipeDia:36,pipeSlope:.003,n:.011,Cd:.68,areaAc:15,rc:.90,impPct:90,preCN:55,postCN:90},
+  {suffix:'Residential Neighborhood Inlet',w:3,d:2,l:30,pipeDia:12,pipeSlope:.008,n:.012,Cd:.62,areaAc:3,rc:.65,impPct:55,preCN:70,postCN:78},
+];
+
+let pits=[], simResults={}, selectedPitId=null, currentRegion='LA', currentForecast='current';
+let chartWL,chartFlow,chartTTF, mapMarkers={}, map;
+
+function generatePits(){
+  pits=[];
+  const region=REGIONS[currentRegion]; let id=1;
+  for(const[city,coords]of Object.entries(region.cities)){
+    const nP=3+Math.floor(Math.random()*3);
+    for(let p=0;p<nP;p++){
+      const cfg={...PIT_CONFIGS[p%PIT_CONFIGS.length]};
+      cfg.p85=region.p85; cfg.p1yr=region.p1yr||0.55;
+      cfg.areaAc=cfg.areaAc+(Math.random()-.5)*2;
+      cfg.sf=0.8;
+      pits.push({
+        id:`PIT-${String(id).padStart(3,'0')}`,
+        name:`${city} — ${cfg.suffix}`,
+        city,
+        lat:coords.lat+(Math.random()-.5)*.015,
+        lng:coords.lng+(Math.random()-.5)*.018,
+        config:cfg
+      });
+      id++;
+    }
+  }
+}
+
+function runAll(){
+  const fc=FORECASTS[currentForecast];
+  const region=REGIONS[currentRegion];
+  simResults={};
+  for(const pit of pits){
+    const profile=fc.makeProfile(region.p85);
+    // Add per-city variation
+    const jitter=1+(Math.random()-.5)*.3;
+    const adjustedProfile=profile.map(([d,i])=>[d,i*jitter]);
+    const engine=new CAEngine(pit.config);
+    simResults[pit.id]={results:engine.simulate(adjustedProfile),compliance:engine.compliance(),engine};
+  }
+}
+
+function getWorst(pitId){
+  const{results}=simResults[pitId];
+  if(!results||!results.length)return{status:'safe',ttf:null,peakWL:0};
+  const pri={overflow:5,critical:4,warning:3,filling:2,safe:1};
+  let worst=results[0],peakWL=0;
+  for(const r of results){if(pri[r.status]>pri[worst.status])worst=r;if(r.wl>peakWL)peakWL=r.wl}
+  let firstTTF=null;
+  for(const r of results){if(r.ttf!==null&&r.ttf<=10){firstTTF=r.ttf;break}}
+  return{status:worst.status,ttf:firstTTF,peakWL,minTTF:worst.ttf};
+}
+
+// ═══ MAP ═══
+function initMap(){
+  const region=REGIONS[currentRegion];
+  if(map)map.remove();
+  map=L.map('map',{zoomControl:true}).setView(region.center,region.zoom);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:19}).addTo(map);
+  mapMarkers={};
+  for(const pit of pits){
+    const info=getWorst(pit.id);const comp=simResults[pit.id].compliance;
+    const color=statusColors[info.status]||'#22c55e';
+    const sz=info.status==='overflow'||info.status==='critical'?14:10;
+    // Ring color for compliance
+    const ring=comp.status==='COMPLIANT'?'#22c55e':comp.status==='AT RISK'?'#f59e0b':'#ef4444';
+    const marker=L.marker([pit.lat,pit.lng],{icon:L.divIcon({className:'',
+      html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${color};border:2px solid ${ring};box-shadow:0 0 8px ${color}"></div>`,
+      iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]})});
+    marker.on('click',()=>selectPit(pit.id));
+    marker.bindTooltip(`<b>${pit.id}</b><br>${pit.city}<br>Flow: <b>${info.status.toUpperCase()}</b><br>NPDES: <b>${comp.status}</b>`,{direction:'top',offset:[0,-8]});
+    marker.addTo(map);
+    mapMarkers[pit.id]=marker;
+  }
+}
+
+// ═══ SIDEBAR ═══
+function renderSidebar(){
+  const pri={overflow:5,critical:4,warning:3,filling:2,safe:1};
+  const sorted=[...pits].sort((a,b)=>pri[getWorst(b.id).status]-pri[getWorst(a.id).status]);
+  document.getElementById('pitList').innerHTML=sorted.map(pit=>{
+    const info=getWorst(pit.id);const comp=simResults[pit.id].compliance;
+    let ttfText='OK';
+    if(info.status==='overflow')ttfText='OVERFLOW';
+    else if(info.ttf!==null)ttfText=`${info.ttf.toFixed(1)} min`;
+    return`<div class="pit-item ${pit.id===selectedPitId?'active':''}" onclick="selectPit('${pit.id}')">
+      <div class="dot ${info.status}"></div>
+      <div class="pit-info">
+        <div class="pit-name">${pit.id}</div>
+        <div class="pit-sub">${pit.city}</div>
+        <div class="pit-badges">
+          <span class="pit-badge ${comp.wqvOk?'pass':'fail'}">WQV ${comp.wqvOk?'✓':'✗'}</span>
+          <span class="pit-badge ${comp.trashOk?'pass':'fail'}">TRASH ${comp.trashOk?'✓':'✗'}</span>
+          <span class="pit-badge ${comp.hydOk?'pass':'fail'}">HYD ${comp.hydOk?'✓':'✗'}</span>
+        </div>
+      </div>
+      <div class="pit-ttf ${info.status}">${ttfText}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('pitCount').textContent=pits.length;
+}
+
+function renderSummary(){
+  const counts={safe:0,filling:0,warning:0,critical:0,overflow:0};
+  const compCounts={COMPLIANT:0,'AT RISK':0,'NON-COMPLIANT':0};
+  for(const pit of pits){
+    counts[getWorst(pit.id).status]++;
+    compCounts[simResults[pit.id].compliance.status]++;
+  }
+  const strip=document.getElementById('summaryStrip');
+  strip.innerHTML=Object.entries(counts).map(([s,c])=>
+    `<div class="chip"><div class="d" style="background:${statusColors[s]}"></div>${c} ${s[0].toUpperCase()+s.slice(1)}</div>`
+  ).join('')+
+  `<div class="compliance-chips">
+    <div class="cc compliant">${compCounts.COMPLIANT} Compliant</div>
+    <div class="cc atrisk">${compCounts['AT RISK']} At Risk</div>
+    <div class="cc noncompliant">${compCounts['NON-COMPLIANT']} Non-Compliant</div>
+    <div class="chip" style="font-size:10px;color:var(--dim)">Permit: ${REGIONS[currentRegion].permit}</div>
+  </div>`;
+}
+
+// ═══ DETAIL ═══
+function selectPit(id){
+  selectedPitId=id;
+  document.getElementById('detailPanel').classList.remove('collapsed');
+  renderSidebar();renderDetail();
+  const pit=pits.find(p=>p.id===id);
+  if(pit)map.panTo([pit.lat,pit.lng]);
+}
+function closeDetail(){document.getElementById('detailPanel').classList.add('collapsed');selectedPitId=null;renderSidebar()}
+
+function renderDetail(){
+  const pit=pits.find(p=>p.id===selectedPitId);if(!pit)return;
+  const{results,compliance:comp,engine}=simResults[pit.id];
+  const info=getWorst(pit.id);
+
+  document.getElementById('dTitle').textContent=pit.id;
+  document.getElementById('dSub').textContent=pit.name;
+
+  const banner=document.getElementById('sBanner');
+  banner.className=`status-banner ${info.status}`;
+  document.getElementById('sLabel').textContent=info.status.toUpperCase();
+  let ttfMsg='System draining — no overflow risk';
+  if(info.status==='overflow')ttfMsg='Overflow occurring — exceeding drain capacity';
+  else if(info.ttf!==null)ttfMsg=`Predicted overflow in ${info.ttf.toFixed(1)} minutes`;
+  document.getElementById('sTTF').textContent=ttfMsg;
+
+  // Compliance cards
+  document.getElementById('compGrid').innerHTML=[
+    ['85th Pctl WQV',`${Math.round(comp.wqvReq).toLocaleString()} ft³`,`${Math.round(comp.wqvProv).toLocaleString()} ft³ available`,comp.wqvOk],
+    ['Trash Capture',`${comp.trashReq.toFixed(1)} cfs req`,`${comp.outCap.toFixed(1)} cfs capacity`,comp.trashOk],
+    ['Hydromod',`Ratio: ${comp.hydR.toFixed(2)}`,`Post/Pre ≤ 1.0`,comp.hydOk],
+    ['NPDES Status',comp.status,comp.violations.length?comp.violations[0]:'All checks pass',comp.status==='COMPLIANT'],
+  ].map(([label,val,sub,ok])=>
+    `<div class="comp-card ${ok?'pass':'fail'}"><div class="clabel">${label}</div><div class="cval" style="color:${ok?'var(--safe)':'var(--critical)'}">${val}</div><div class="csub">${sub}</div></div>`
+  ).join('');
+
+  // Specs
+  const c=pit.config;
+  document.getElementById('specGrid').innerHTML=[
+    ['Drain Size',`${c.w}×${c.d}×${c.l}`,'ft'],
+    ['Storage',engine.drainVol.toFixed(0),'ft³'],
+    ['Outlet Pipe',`${c.pipeDia}"`,`dia`],
+    ['Full-Bore',`${engine.manningQ().toFixed(1)}`,'cfs'],
+    ['Catchment',c.areaAc.toFixed(1),'acres'],
+    ['Runoff C',c.rc.toFixed(2),''],
+    ['Peak WL',info.peakWL.toFixed(2),`ft / ${c.d} ft`],
+    ['Impervious',c.impPct,'%'],
+  ].map(([l,v,u])=>`<div class="spec-card"><div class="label">${l}</div><div class="value">${v} <span class="unit">${u}</span></div></div>`).join('');
+
+  // Forecast bars
+  const fc=FORECASTS[currentForecast].makeProfile(REGIONS[currentRegion].p85);
+  const maxI=Math.max(...fc.map(f=>f[1]),0.01);
+  document.getElementById('fcBars').innerHTML=fc.map(([d,i],idx)=>{
+    const h=Math.max(2,(i/maxI)*50);
+    const color=i>2?statusColors.critical:i>1?statusColors.warning:i>.5?statusColors.filling:statusColors.safe;
+    return`<div class="fbar" style="height:${h}px;background:${color}" title="${i.toFixed(2)} in/hr">${idx%2===0?`<span class="bl">${idx*10}m</span>`:''}</div>`;
+  }).join('');
+
+  renderCharts(results,c);
+}
+
+function renderCharts(results,cfg){
+  const labels=results.map(r=>r.time);
+  const opts={responsive:true,animation:{duration:200},
+    plugins:{legend:{labels:{color:'#7b8ba5',font:{size:10}}}},
+    scales:{x:{title:{display:true,text:'Time (min)',color:'#7b8ba5'},ticks:{color:'#4a5568'},grid:{color:'#1e2a42'}},
+            y:{ticks:{color:'#4a5568'},grid:{color:'#1e2a42'}}}};
+
+  if(chartWL)chartWL.destroy();
+  chartWL=new Chart(document.getElementById('cWL'),{type:'line',data:{labels,datasets:[
+    {label:'Water Level (ft)',data:results.map(r=>r.wl),borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.12)',fill:true,tension:.3,pointRadius:0},
+    {label:'Overflow Lip',data:results.map(()=>cfg.d),borderColor:'#ef4444',borderDash:[6,4],pointRadius:0,borderWidth:2},
+  ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'ft',color:'#7b8ba5'}}}}});
+
+  if(chartFlow)chartFlow.destroy();
+  const engine=new CAEngine(cfg);
+  chartFlow=new Chart(document.getElementById('cFlow'),{type:'line',data:{labels,datasets:[
+    {label:'Inflow (cfs)',data:results.map(r=>r.qIn),borderColor:'#f59e0b',tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Outflow (cfs)',data:results.map(r=>r.qOut),borderColor:'#22c55e',tension:.3,pointRadius:0,borderWidth:2},
+    {label:'Design Capacity',data:results.map(()=>engine.manningQ()),borderColor:'#a78bfa',borderDash:[4,4],pointRadius:0,borderWidth:1},
+    {label:'Trash FCS Design',data:results.map(()=>engine.trashQ()),borderColor:'#ec4899',borderDash:[2,4],pointRadius:0,borderWidth:1},
+  ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'cfs',color:'#7b8ba5'}}}}});
+
+  if(chartTTF)chartTTF.destroy();
+  chartTTF=new Chart(document.getElementById('cTTF'),{type:'line',data:{labels,datasets:[
+    {label:'TTF (min)',data:results.map(r=>r.ttf!==null?Math.min(r.ttf,60):null),borderColor:'#a78bfa',tension:.3,pointRadius:0,borderWidth:2,spanGaps:false},
+    {label:'Critical (4 min)',data:results.map(()=>4),borderColor:'#ef4444',borderDash:[4,4],pointRadius:0,borderWidth:1},
+    {label:'Warning (10 min)',data:results.map(()=>10),borderColor:'#f59e0b',borderDash:[4,4],pointRadius:0,borderWidth:1},
+  ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,min:0,max:60,title:{display:true,text:'Minutes',color:'#7b8ba5'}}}}});
+}
+
+// ═══ CONTROLS ═══
+document.getElementById('regionSel').addEventListener('change',e=>{currentRegion=e.target.value;rebuild()});
+document.getElementById('fcSel').addEventListener('change',e=>{currentForecast=e.target.value;runAll();refreshUI()});
+
+function rebuild(){
+  generatePits();runAll();initMap();renderSidebar();renderSummary();
+  if(selectedPitId&&!pits.find(p=>p.id===selectedPitId)){closeDetail();}
+  else if(selectedPitId)renderDetail();
+}
+function refreshUI(){
+  for(const pit of pits){
+    const info=getWorst(pit.id);const comp=simResults[pit.id].compliance;
+    const color=statusColors[info.status];const sz=info.status==='overflow'||info.status==='critical'?14:10;
+    const ring=comp.status==='COMPLIANT'?'#22c55e':comp.status==='AT RISK'?'#f59e0b':'#ef4444';
+    mapMarkers[pit.id].setIcon(L.divIcon({className:'',
+      html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${color};border:2px solid ${ring};box-shadow:0 0 8px ${color}"></div>`,
+      iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]}));
+  }
+  renderSidebar();renderSummary();
+  if(selectedPitId)renderDetail();
+}
+
+function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+
+// ═══ INIT ═══
+generatePits();runAll();initMap();renderSidebar();renderSummary();updateClock();setInterval(updateClock,1000);
+
+// Auto-select worst
+const pri={overflow:5,critical:4,warning:3,filling:2,safe:1};
+const worst=pits.reduce((w,p)=>pri[getWorst(p.id).status]>pri[getWorst(w.id).status]?p:w,pits[0]);
+selectPit(worst.id);
+</script>
+</body>
+</html>
