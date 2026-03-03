@@ -18,6 +18,7 @@
 
   .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
   .topbar h1{font-size:16px;font-weight:700;color:var(--accent)}
+  .topbar-logo{height:26px;width:auto;flex-shrink:0}
   .topbar .ca-badge{background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.5px}
   .topbar .live{background:var(--critical);color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:10px;animation:blink 1.5s infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
@@ -346,15 +347,72 @@
   .spt-route-stat .rs-val{font-size:16px;font-weight:800;color:var(--accent)}
   .spt-route-stat .rs-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.3px}
 
-  @media(max-width:1200px){.sidebar{width:260px}.detail{width:360px}.spt-left{width:320px}}
-  @media(max-width:900px){.main{flex-direction:column}.sidebar{width:100%;height:180px}.detail{width:100%;height:50%}.rpt-charts-row{grid-template-columns:1fr}.spt-view{flex-direction:column}.spt-left{width:100%;max-height:50%}.spt-right{min-height:300px}}
+  /* ── Sandbox Tab ── */
+  .sbx-view{display:flex;flex:1;overflow:hidden;background:var(--bg)}
+  .sbx-sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+  .sbx-sidebar-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .sbx-sidebar-hdr h3{font-size:13px;font-weight:700;color:var(--text)}
+  .sbx-sidebar-hdr svg{width:16px;height:16px;stroke:var(--accent);fill:none;flex-shrink:0}
+  .sbx-conn{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+  .sbx-conn-row{display:flex;align-items:center;gap:6px;font-size:11px}
+  .sbx-conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .sbx-conn-dot.on{background:var(--safe)}
+  .sbx-conn-dot.off{background:var(--critical)}
+  .sbx-conn-label{color:var(--dim);flex:1}
+  .sbx-conn-val{color:var(--text);font-weight:600;font-size:11px}
+  .sbx-connect-btn{padding:5px 10px;border-radius:5px;border:1px solid rgba(96,165,250,.25);background:var(--surface2);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;width:fit-content}
+  .sbx-connect-btn:hover{background:rgba(96,165,250,.1)}
+  .sbx-connect-btn.active{border-color:var(--safe);color:var(--safe)}
+  .sbx-schema{flex:1;overflow-y:auto;padding:8px 0}
+  .sbx-tbl-item{padding:6px 14px;cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text)}
+  .sbx-tbl-item:hover{background:var(--surface2)}
+  .sbx-tbl-item.active{background:var(--surface2);border-left:3px solid var(--accent)}
+  .sbx-tbl-item svg{width:14px;height:14px;stroke:var(--dim);fill:none;flex-shrink:0}
+  .sbx-tbl-cols{padding:2px 14px 6px 36px;font-size:10px;color:var(--dim);display:none}
+  .sbx-tbl-cols.open{display:block}
+  .sbx-tbl-col{padding:2px 0;display:flex;align-items:center;gap:6px}
+  .sbx-tbl-col .pk{color:var(--warning);font-weight:700;font-size:9px}
+  .sbx-tbl-col .col-type{margin-left:auto;font-size:9px;color:var(--dim);opacity:.6}
+  .sbx-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .sbx-editor-area{display:flex;flex-direction:column;border-bottom:1px solid var(--border);flex-shrink:0}
+  .sbx-editor-toolbar{padding:6px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);background:var(--surface)}
+  .sbx-editor-toolbar h3{font-size:12px;font-weight:600;color:var(--dim);flex:1}
+  .sbx-run-btn{padding:6px 14px;border-radius:5px;border:none;background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+  .sbx-run-btn:hover{filter:brightness(1.1)}
+  .sbx-run-btn svg{width:12px;height:12px;stroke:currentColor;fill:none}
+  .sbx-sample-btn{padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-size:10px;cursor:pointer;transition:all .15s}
+  .sbx-sample-btn:hover{color:var(--text);border-color:rgba(96,165,250,.3)}
+  .sbx-editor{position:relative}
+  .sbx-textarea{width:100%;min-height:120px;max-height:240px;padding:12px 14px;background:var(--bg);color:#93c5fd;border:none;font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:13px;line-height:1.6;resize:vertical;outline:none;tab-size:2}
+  .sbx-textarea::placeholder{color:var(--dim);opacity:.5}
+  .sbx-results-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .sbx-results-toolbar{padding:6px 14px;display:flex;align-items:center;gap:10px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+  .sbx-results-toolbar h3{font-size:12px;font-weight:600;color:var(--dim)}
+  .sbx-results-meta{margin-left:auto;font-size:10px;color:var(--dim)}
+  .sbx-results-scroll{flex:1;overflow:auto}
+  .sbx-results-table{width:100%;border-collapse:collapse;font-size:12px}
+  .sbx-results-table th{background:var(--surface);position:sticky;top:0;padding:8px 12px;text-align:left;font-weight:600;color:var(--dim);border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+  .sbx-results-table td{padding:6px 12px;border-bottom:1px solid rgba(45,58,82,.4);color:var(--text);white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+  .sbx-results-table tr:hover td{background:rgba(96,165,250,.04)}
+  .sbx-results-table td.null-val{color:var(--dim);font-style:italic}
+  .sbx-msg{padding:40px 20px;text-align:center;color:var(--dim);font-size:13px}
+  .sbx-msg svg{width:48px;height:48px;stroke:var(--border);fill:none;margin-bottom:12px}
+  .sbx-msg .msg-tip{font-size:11px;margin-top:8px;color:var(--dim);opacity:.6}
+  .sbx-error{padding:12px 14px;background:rgba(239,68,68,.08);border-left:3px solid var(--critical);color:var(--critical);font-size:12px;font-family:monospace}
+  .sbx-history{padding:8px 14px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;max-height:80px;overflow-y:auto}
+  .sbx-history-item{font-size:10px;padding:3px 0;color:var(--dim);cursor:pointer;display:flex;align-items:center;gap:6px;transition:color .1s}
+  .sbx-history-item:hover{color:var(--accent)}
+  .sbx-history-item svg{width:10px;height:10px;stroke:currentColor;fill:none;flex-shrink:0}
+
+  @media(max-width:1200px){.sidebar{width:260px}.detail{width:360px}.spt-left{width:320px}.sbx-sidebar{width:240px}}
+  @media(max-width:900px){.main{flex-direction:column}.sidebar{width:100%;height:180px}.detail{width:100%;height:50%}.rpt-charts-row{grid-template-columns:1fr}.spt-view{flex-direction:column}.spt-left{width:100%;max-height:50%}.spt-right{min-height:300px}.sbx-view{flex-direction:column}.sbx-sidebar{width:100%;max-height:180px}}
   @media(max-width:600px){.sp-voice-bar{min-width:auto;left:10px;right:10px;transform:none}.sp-job-panel{left:10px;right:10px;width:auto}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <h1>CA Stormwater Overflow &amp; Compliance</h1>
+  <svg class="topbar-logo" viewBox="0 0 882.34 283.26" xmlns="http://www.w3.org/2000/svg"><defs><style>.lf1{fill:#fff}.lf2{fill:none;stroke:url(#lfGrad);stroke-miterlimit:10;stroke-width:8.5px}</style><linearGradient id="lfGrad" x1="0" y1="141.63" x2="882.34" y2="141.63" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#da8cbc"/><stop offset="1" stop-color="#438bc9"/></linearGradient></defs><g><g><path class="lf1" d="M105.2,194.91h43.92v13.32h-60.3v-125.46h16.38v112.14Z"/><path class="lf1" d="M167.12,90.33c-2.16-2.16-3.24-4.8-3.24-7.92s1.08-5.76,3.24-7.92,4.8-3.24,7.92-3.24,5.55,1.08,7.65,3.24c2.1,2.16,3.15,4.8,3.15,7.92s-1.05,5.76-3.15,7.92c-2.1,2.16-4.65,3.24-7.65,3.24s-5.76-1.08-7.92-3.24ZM182.96,109.59v98.64h-16.38v-98.64h16.38Z"/><path class="lf1" d="M247.58,193.11l30.6-83.52h17.46l-38.7,98.64h-19.08l-38.7-98.64h17.64l30.78,83.52Z"/><path class="lf1" d="M401.3,165.03h-78.84c.6,9.72,3.93,17.31,9.99,22.77,6.06,5.46,13.41,8.19,22.05,8.19,7.08,0,12.99-1.65,17.73-4.95,4.74-3.3,8.07-7.71,9.99-13.23h17.64c-2.64,9.48-7.92,17.19-15.84,23.13s-17.76,8.91-29.52,8.91c-9.36,0-17.73-2.1-25.11-6.3-7.38-4.2-13.17-10.17-17.37-17.91-4.2-7.74-6.3-16.71-6.3-26.91s2.04-19.14,6.12-26.82c4.08-7.68,9.81-13.59,17.19-17.73,7.38-4.14,15.87-6.21,25.47-6.21s17.64,2.04,24.84,6.12c7.2,4.08,12.75,9.69,16.65,16.83,3.9,7.14,5.85,15.21,5.85,24.21,0,3.12-.18,6.42-.54,9.9ZM380.78,135.6c-2.76-4.5-6.51-7.92-11.25-10.26-4.74-2.34-9.99-3.51-15.75-3.51-8.28,0-15.33,2.64-21.15,7.92-5.82,5.28-9.15,12.6-9.99,21.96h62.28c0-6.24-1.38-11.61-4.14-16.11Z"/><path class="lf1" d="M494.36,82.77v13.32h-54.54v42.3h44.28v13.32h-44.28v56.52h-16.38v-125.46h70.92Z"/><path class="lf1" d="M530.54,75.03v133.2h-16.38V75.03h16.38Z"/><path class="lf1" d="M576.34,203.55c-7.5-4.2-13.38-10.17-17.64-17.91-4.26-7.74-6.39-16.71-6.39-26.91s2.19-18.99,6.57-26.73c4.38-7.74,10.35-13.68,17.91-17.82,7.56-4.14,16.02-6.21,25.38-6.21s17.82,2.07,25.38,6.21c7.56,4.14,13.53,10.05,17.91,17.73,4.38,7.68,6.57,16.62,6.57,26.82s-2.25,19.17-6.75,26.91-10.59,13.71-18.27,17.91c-7.68,4.2-16.2,6.3-25.56,6.3s-17.61-2.1-25.11-6.3ZM618.01,191.31c5.16-2.76,9.33-6.9,12.51-12.42,3.18-5.52,4.77-12.24,4.77-20.16s-1.56-14.64-4.68-20.16c-3.12-5.52-7.2-9.63-12.24-12.33s-10.5-4.05-16.38-4.05-11.49,1.35-16.47,4.05c-4.98,2.7-8.97,6.81-11.97,12.33-3,5.52-4.5,12.24-4.5,20.16s1.47,14.82,4.41,20.34c2.94,5.52,6.87,9.63,11.79,12.33,4.92,2.7,10.32,4.05,16.2,4.05s11.4-1.38,16.56-4.14Z"/><path class="lf1" d="M805.03,109.59l-30.78,98.64h-16.92l-23.76-78.3-23.76,78.3h-16.92l-30.96-98.64h16.74l22.68,82.8,24.48-82.8h16.74l23.94,82.98,22.32-82.98h16.2Z"/></g><rect class="lf2" x="4.25" y="4.25" width="873.84" height="274.76"/></g></svg>
   <span class="ca-badge">NPDES / MS4</span>
   <span class="live">LIVE</span>
   <div class="topbar-r">
@@ -391,6 +449,10 @@
   <button class="tab-btn" id="tabStormPilot" onclick="switchTab('stormpilot')" style="gap:5px">
     <svg viewBox="0 0 24 24" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
     StormPilot
+  </button>
+  <button class="tab-btn" id="tabSandbox" onclick="switchTab('sandbox')" style="gap:5px">
+    <svg viewBox="0 0 24 24" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+    Sandbox
   </button>
 </div>
 
@@ -532,6 +594,64 @@
     </div>
   </div>
 </div><!-- /viewStormPilot -->
+
+<div class="view-panel" id="viewSandbox">
+  <div class="sbx-view">
+    <!-- Schema Sidebar -->
+    <div class="sbx-sidebar">
+      <div class="sbx-sidebar-hdr">
+        <svg viewBox="0 0 24 24" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <h3>Schema Browser</h3>
+      </div>
+      <div class="sbx-conn" id="sbxConn">
+        <div class="sbx-conn-row"><span class="sbx-conn-dot off" id="sbxConnDot"></span><span class="sbx-conn-label">Status</span><span class="sbx-conn-val" id="sbxConnStatus">Disconnected</span></div>
+        <div class="sbx-conn-row"><span class="sbx-conn-label">Engine</span><span class="sbx-conn-val">In-Memory SQL</span></div>
+        <div class="sbx-conn-row"><span class="sbx-conn-label">Tables</span><span class="sbx-conn-val" id="sbxTableCount">0</span></div>
+        <button class="sbx-connect-btn" id="sbxConnectBtn" onclick="sbxConnect()">
+          <svg viewBox="0 0 24 24" stroke-width="2" style="width:12px;height:12px"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+          Connect &amp; Load Data
+        </button>
+      </div>
+      <div class="sbx-schema" id="sbxSchema">
+        <div class="sbx-msg" style="padding:20px;font-size:11px">Connect to load schema</div>
+      </div>
+    </div>
+    <!-- Main Query Area -->
+    <div class="sbx-main">
+      <div class="sbx-editor-area">
+        <div class="sbx-editor-toolbar">
+          <h3>SQL Query Editor</h3>
+          <button class="sbx-sample-btn" onclick="sbxLoadSample('overview')">Overview</button>
+          <button class="sbx-sample-btn" onclick="sbxLoadSample('compliance')">Compliance</button>
+          <button class="sbx-sample-btn" onclick="sbxLoadSample('critical')">Critical Pits</button>
+          <button class="sbx-sample-btn" onclick="sbxLoadSample('join')">Join Query</button>
+          <button class="sbx-sample-btn" onclick="sbxLoadSample('aggregate')">Aggregates</button>
+          <button class="sbx-run-btn" onclick="sbxRunQuery()">
+            <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run (Ctrl+Enter)
+          </button>
+        </div>
+        <div class="sbx-editor">
+          <textarea class="sbx-textarea" id="sbxQuery" placeholder="-- Write SQL here. Press Ctrl+Enter to run.&#10;-- Connect first to load live dashboard data.&#10;&#10;SELECT * FROM drain_pits LIMIT 10;" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="sbx-results-area">
+        <div class="sbx-results-toolbar">
+          <h3>Results</h3>
+          <span class="sbx-results-meta" id="sbxResultsMeta"></span>
+        </div>
+        <div class="sbx-results-scroll" id="sbxResultsScroll">
+          <div class="sbx-msg" id="sbxEmptyMsg">
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            <div>Connect to database and run a query to see results</div>
+            <div class="msg-tip">Use sample queries above or write your own SQL</div>
+          </div>
+        </div>
+        <div class="sbx-history" id="sbxHistory" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /viewSandbox -->
 </div><!-- /view-container -->
 
 <!-- Hidden file input for photo capture -->
@@ -1348,22 +1468,18 @@ document.getElementById('spJobsToggle').addEventListener('click',()=>{
 let rptStatusChart,rptCompChart,rptCityChart,rptCapChart;
 
 function switchTab(tab){
-  ['Live','Report','StormPilot'].forEach(t=>{
-    const key=t.toLowerCase();
+  const tabs=['Live','Report','StormPilot','Sandbox'];
+  const keys={Live:'live',Report:'report',StormPilot:'stormpilot',Sandbox:'sandbox'};
+  tabs.forEach(t=>{
+    const k=keys[t];
     const el=document.getElementById('tab'+t);
     const view=document.getElementById('view'+t);
-    if(el) el.classList.toggle('active',tab===key||( tab==='live'&&key==='live')||( tab==='report'&&key==='report')||( tab==='stormpilot'&&key==='stormpilot'));
-    if(view) view.classList.toggle('active',false);
+    if(el) el.classList.toggle('active',tab===k);
+    if(view) view.classList.toggle('active',tab===k);
   });
-  // Simpler approach
-  document.getElementById('tabLive').classList.toggle('active',tab==='live');
-  document.getElementById('tabReport').classList.toggle('active',tab==='report');
-  document.getElementById('tabStormPilot').classList.toggle('active',tab==='stormpilot');
-  document.getElementById('viewLive').classList.toggle('active',tab==='live');
-  document.getElementById('viewReport').classList.toggle('active',tab==='report');
-  document.getElementById('viewStormPilot').classList.toggle('active',tab==='stormpilot');
   if(tab==='report') renderReporting();
   if(tab==='stormpilot') renderStormPilotTab();
+  if(tab==='sandbox') sbxInit();
 }
 
 function renderReporting(){
@@ -1756,6 +1872,669 @@ function sptOptimizeRoute(){
   sptRenderKanban();
   sptDrawRoute();
   spShowFeedback('Route optimized: high priority first, nearest-neighbor within tiers');
+}
+
+// ═══ SANDBOX DATABASE ═══
+let sbxConnected=false, sbxDB={}, sbxQueryHistory=[];
+
+const SBX_SCHEMA={
+  drain_pits:{
+    desc:'All monitored drain pits with specifications',
+    pk:'pit_id',
+    cols:[
+      {name:'pit_id',type:'TEXT',pk:true},
+      {name:'city',type:'TEXT'},
+      {name:'lat',type:'REAL'},
+      {name:'lng',type:'REAL'},
+      {name:'depth_m',type:'REAL'},
+      {name:'diameter_m',type:'REAL'},
+      {name:'orifice_m',type:'REAL'},
+      {name:'manning_n',type:'REAL'},
+      {name:'slope',type:'REAL'},
+      {name:'imperv_pct',type:'REAL'},
+      {name:'catch_ha',type:'REAL'}
+    ]
+  },
+  simulation_results:{
+    desc:'Latest simulation outputs per pit',
+    pk:'pit_id',
+    cols:[
+      {name:'pit_id',type:'TEXT',pk:true},
+      {name:'status',type:'TEXT'},
+      {name:'peak_wl_m',type:'REAL'},
+      {name:'peak_inflow_cms',type:'REAL'},
+      {name:'peak_outflow_cms',type:'REAL'},
+      {name:'ttf_min',type:'REAL'},
+      {name:'exceedance_pct',type:'REAL'},
+      {name:'wqv_ratio',type:'REAL'},
+      {name:'hydro_ratio',type:'REAL'},
+      {name:'trash_capture_pct',type:'REAL'}
+    ]
+  },
+  compliance:{
+    desc:'NPDES compliance status per pit',
+    pk:'pit_id',
+    cols:[
+      {name:'pit_id',type:'TEXT',pk:true},
+      {name:'overall',type:'TEXT'},
+      {name:'wqv_pass',type:'BOOLEAN'},
+      {name:'trash_pass',type:'BOOLEAN'},
+      {name:'hydro_pass',type:'BOOLEAN'},
+      {name:'exceedance_pct',type:'REAL'}
+    ]
+  },
+  forecast_rainfall:{
+    desc:'WeatherNext2 forecast rainfall by pit and timestep',
+    pk:null,
+    cols:[
+      {name:'pit_id',type:'TEXT'},
+      {name:'timestep',type:'INTEGER'},
+      {name:'time_label',type:'TEXT'},
+      {name:'rainfall_mm',type:'REAL'},
+      {name:'forecast_type',type:'TEXT'}
+    ]
+  },
+  stormpilot_jobs:{
+    desc:'StormPilot field jobs from kanban board',
+    pk:'job_id',
+    cols:[
+      {name:'job_id',type:'INTEGER',pk:true},
+      {name:'pit_id',type:'TEXT'},
+      {name:'type',type:'TEXT'},
+      {name:'priority',type:'TEXT'},
+      {name:'status',type:'TEXT'},
+      {name:'crew',type:'TEXT'},
+      {name:'city',type:'TEXT'},
+      {name:'lat',type:'REAL'},
+      {name:'lng',type:'REAL'}
+    ]
+  }
+};
+
+const SBX_SAMPLES={
+  overview:"SELECT pit_id, city, status, peak_wl_m, ttf_min\nFROM simulation_results\nORDER BY ttf_min ASC\nLIMIT 20;",
+  compliance:"SELECT c.pit_id, c.overall, c.wqv_pass, c.trash_pass, c.hydro_pass,\n       p.city, s.status\nFROM compliance c\nJOIN drain_pits p ON c.pit_id = p.pit_id\nJOIN simulation_results s ON c.pit_id = s.pit_id\nORDER BY c.overall DESC;",
+  critical:"SELECT s.pit_id, p.city, s.status, s.peak_wl_m, s.ttf_min,\n       ROUND(s.peak_wl_m / p.depth_m * 100, 1) AS capacity_pct\nFROM simulation_results s\nJOIN drain_pits p ON s.pit_id = p.pit_id\nWHERE s.status IN ('critical','overflow')\nORDER BY s.ttf_min ASC;",
+  join:"SELECT p.pit_id, p.city, p.depth_m, p.diameter_m,\n       s.status, s.peak_wl_m, s.ttf_min,\n       c.overall AS compliance\nFROM drain_pits p\nJOIN simulation_results s ON p.pit_id = s.pit_id\nJOIN compliance c ON p.pit_id = c.pit_id\nORDER BY p.city, s.status;",
+  aggregate:"SELECT p.city,\n       COUNT(*) AS total_pits,\n       SUM(CASE WHEN s.status='overflow' THEN 1 ELSE 0 END) AS overflow_count,\n       SUM(CASE WHEN s.status='critical' THEN 1 ELSE 0 END) AS critical_count,\n       ROUND(AVG(s.ttf_min),1) AS avg_ttf,\n       ROUND(AVG(s.peak_wl_m),2) AS avg_peak_wl,\n       SUM(CASE WHEN c.overall='COMPLIANT' THEN 1 ELSE 0 END) AS compliant_count\nFROM drain_pits p\nJOIN simulation_results s ON p.pit_id = s.pit_id\nJOIN compliance c ON p.pit_id = c.pit_id\nGROUP BY p.city\nORDER BY overflow_count DESC;"
+};
+
+function sbxInit(){
+  // Keyboard shortcut
+  const ta=document.getElementById('sbxQuery');
+  if(!ta._sbxBound){
+    ta._sbxBound=true;
+    ta.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();sbxRunQuery();}
+      if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart;ta.value=ta.value.substring(0,s)+'  '+ta.value.substring(ta.selectionEnd);ta.selectionStart=ta.selectionEnd=s+2;}
+    });
+  }
+}
+
+function sbxConnect(){
+  if(sbxConnected){sbxDisconnect();return;}
+  const btn=document.getElementById('sbxConnectBtn');
+  btn.innerHTML='<svg viewBox="0 0 24 24" stroke-width="2" style="width:12px;height:12px;animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg>Connecting...';
+
+  setTimeout(()=>{
+    sbxDB={};
+    // Populate drain_pits
+    sbxDB.drain_pits=pits.map(p=>({
+      pit_id:p.id, city:p.city, lat:p.lat, lng:p.lng,
+      depth_m:p.depth, diameter_m:p.diam, orifice_m:p.orifice,
+      manning_n:p.n, slope:p.slope, imperv_pct:p.imperv, catch_ha:p.catchArea
+    }));
+    // Populate simulation_results
+    sbxDB.simulation_results=pits.map(p=>{
+      const sim=simResults[p.id];
+      const info=getWorst(p.id);
+      return {
+        pit_id:p.id, status:info.status,
+        peak_wl_m:Math.max(...sim.waterLevel),
+        peak_inflow_cms:Math.max(...sim.inflow),
+        peak_outflow_cms:Math.max(...sim.outflow),
+        ttf_min:info.ttf, exceedance_pct:sim.compliance.exceedance,
+        wqv_ratio:sim.compliance.wqv, hydro_ratio:sim.compliance.hydro,
+        trash_capture_pct:sim.compliance.trash
+      };
+    });
+    // Populate compliance
+    sbxDB.compliance=pits.map(p=>{
+      const sim=simResults[p.id];
+      const c=sim.compliance;
+      return {
+        pit_id:p.id, overall:c.overall,
+        wqv_pass:c.wqv>=1, trash_pass:c.trash>=70, hydro_pass:c.hydro<=1.1,
+        exceedance_pct:c.exceedance
+      };
+    });
+    // Populate forecast_rainfall
+    sbxDB.forecast_rainfall=[];
+    pits.forEach(p=>{
+      const sim=simResults[p.id];
+      if(sim&&sim.rainfall){
+        sim.rainfall.forEach((r,i)=>{
+          sbxDB.forecast_rainfall.push({pit_id:p.id,timestep:i,time_label:(i*15)+'min',rainfall_mm:r,forecast_type:currentForecast});
+        });
+      }
+    });
+    // Populate stormpilot_jobs
+    sbxDB.stormpilot_jobs=spJobs.map(j=>({
+      job_id:j.id, pit_id:j.pitId, type:j.type, priority:j.priority,
+      status:j.status, crew:j.crew, city:j.city||'', lat:j.lat||0, lng:j.lng||0
+    }));
+
+    sbxConnected=true;
+    document.getElementById('sbxConnDot').classList.replace('off','on');
+    document.getElementById('sbxConnStatus').textContent='Connected';
+    document.getElementById('sbxTableCount').textContent=Object.keys(SBX_SCHEMA).length;
+    btn.innerHTML='<svg viewBox="0 0 24 24" stroke-width="2" style="width:12px;height:12px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Disconnect';
+    btn.classList.add('active');
+    sbxRenderSchema();
+    const rows=Object.values(sbxDB).reduce((s,t)=>s+t.length,0);
+    document.getElementById('sbxResultsMeta').textContent=`Connected — ${rows} total rows across ${Object.keys(SBX_SCHEMA).length} tables`;
+    document.getElementById('sbxEmptyMsg').innerHTML=`<svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg><div>Connected! ${rows} rows loaded from live dashboard data.</div><div class="msg-tip">Try a sample query or write your own SQL above</div>`;
+  },600);
+}
+
+function sbxDisconnect(){
+  sbxConnected=false;sbxDB={};
+  document.getElementById('sbxConnDot').classList.replace('on','off');
+  document.getElementById('sbxConnStatus').textContent='Disconnected';
+  document.getElementById('sbxTableCount').textContent='0';
+  const btn=document.getElementById('sbxConnectBtn');
+  btn.innerHTML='<svg viewBox="0 0 24 24" stroke-width="2" style="width:12px;height:12px"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>Connect &amp; Load Data';
+  btn.classList.remove('active');
+  document.getElementById('sbxSchema').innerHTML='<div class="sbx-msg" style="padding:20px;font-size:11px">Connect to load schema</div>';
+}
+
+function sbxRenderSchema(){
+  const el=document.getElementById('sbxSchema');
+  let html='';
+  for(const [tbl,info] of Object.entries(SBX_SCHEMA)){
+    const rowCount=sbxDB[tbl]?sbxDB[tbl].length:0;
+    html+=`<div class="sbx-tbl-item" onclick="sbxToggleTable(this,'${tbl}')">
+      <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      <span style="flex:1">${tbl}</span><span style="font-size:10px;color:var(--dim)">${rowCount}</span>
+    </div>
+    <div class="sbx-tbl-cols" id="sbxCols_${tbl}">`;
+    info.cols.forEach(c=>{
+      html+=`<div class="sbx-tbl-col">${c.pk?'<span class="pk">PK</span>':''}<span>${c.name}</span><span class="col-type">${c.type}</span></div>`;
+    });
+    html+=`</div>`;
+  }
+  el.innerHTML=html;
+}
+
+function sbxToggleTable(el,tbl){
+  const cols=document.getElementById('sbxCols_'+tbl);
+  cols.classList.toggle('open');
+  el.classList.toggle('active');
+  // Pre-fill SELECT query
+  if(cols.classList.contains('open')){
+    document.getElementById('sbxQuery').value=`SELECT * FROM ${tbl} LIMIT 20;`;
+  }
+}
+
+function sbxLoadSample(key){
+  document.getElementById('sbxQuery').value=SBX_SAMPLES[key]||'';
+}
+
+// ── Mini SQL Engine ──
+function sbxRunQuery(){
+  if(!sbxConnected){
+    sbxShowError('Not connected. Click "Connect & Load Data" first.');
+    return;
+  }
+  const raw=document.getElementById('sbxQuery').value.trim();
+  if(!raw){sbxShowError('Empty query.');return;}
+
+  const startTime=performance.now();
+  try{
+    const result=sbxExecuteSQL(raw);
+    const elapsed=Math.round(performance.now()-startTime);
+    sbxRenderResults(result.rows,result.columns,elapsed);
+    sbxAddHistory(raw);
+  }catch(e){
+    sbxShowError(e.message);
+  }
+}
+
+function sbxExecuteSQL(sql){
+  // Normalize
+  const q=sql.replace(/;$/,'').trim();
+  const upper=q.toUpperCase();
+
+  // Parse SELECT statement
+  if(!upper.startsWith('SELECT')) throw new Error('Only SELECT queries are supported in the sandbox.');
+
+  // Parse: SELECT ... FROM ... [JOIN ...] [WHERE ...] [GROUP BY ...] [ORDER BY ...] [LIMIT ...]
+  const parsed=sbxParseSelect(q);
+
+  // Resolve FROM table
+  let rows=sbxResolveFrom(parsed.from);
+
+  // Apply JOINs
+  if(parsed.joins&&parsed.joins.length>0){
+    for(const join of parsed.joins){
+      rows=sbxApplyJoin(rows,join);
+    }
+  }
+
+  // Apply WHERE
+  if(parsed.where){
+    rows=sbxApplyWhere(rows,parsed.where);
+  }
+
+  // Apply GROUP BY
+  if(parsed.groupBy){
+    rows=sbxApplyGroupBy(rows,parsed.select,parsed.groupBy);
+  }
+
+  // Apply ORDER BY
+  if(parsed.orderBy){
+    rows=sbxApplyOrderBy(rows,parsed.orderBy);
+  }
+
+  // Apply LIMIT
+  if(parsed.limit!=null){
+    rows=rows.slice(0,parsed.limit);
+  }
+
+  // Select columns
+  let columns;
+  if(parsed.groupBy){
+    columns=rows.length>0?Object.keys(rows[0]):[];
+  } else {
+    const projResult=sbxProjectColumns(rows,parsed.select);
+    rows=projResult.rows;
+    columns=projResult.columns;
+  }
+
+  return {rows,columns};
+}
+
+function sbxParseSelect(q){
+  const result={select:'',from:'',joins:[],where:null,groupBy:null,orderBy:null,limit:null};
+
+  // Use regex to find clauses (case-insensitive)
+  let work=q;
+
+  // LIMIT
+  const limMatch=work.match(/\bLIMIT\s+(\d+)\s*$/i);
+  if(limMatch){result.limit=parseInt(limMatch[1]);work=work.substring(0,limMatch.index).trim();}
+
+  // ORDER BY
+  const obMatch=work.match(/\bORDER\s+BY\s+(.+?)$/i);
+  if(obMatch){result.orderBy=obMatch[1].trim();work=work.substring(0,obMatch.index).trim();}
+
+  // GROUP BY
+  const gbMatch=work.match(/\bGROUP\s+BY\s+(.+?)$/i);
+  if(gbMatch){result.groupBy=gbMatch[1].trim();work=work.substring(0,gbMatch.index).trim();}
+
+  // WHERE
+  const whereMatch=work.match(/\bWHERE\s+(.+?)$/i);
+  if(whereMatch){result.where=whereMatch[1].trim();work=work.substring(0,whereMatch.index).trim();}
+
+  // JOINs
+  const joinRe=/\bJOIN\s+(\w+)(?:\s+(\w+))?\s+ON\s+(.+?)(?=\bJOIN\b|$)/gi;
+  let jm;
+  const joinStart=work.search(/\bJOIN\b/i);
+  if(joinStart>=0){
+    const joinPart=work.substring(joinStart);
+    work=work.substring(0,joinStart).trim();
+    while((jm=joinRe.exec(joinPart))!==null){
+      result.joins.push({table:jm[1],alias:jm[2]||jm[1],on:jm[3].trim()});
+    }
+  }
+
+  // FROM
+  const fromMatch=work.match(/\bFROM\s+(\w+)(?:\s+(\w+))?\s*$/i);
+  if(!fromMatch) throw new Error('Could not parse FROM clause');
+  result.from={table:fromMatch[1],alias:fromMatch[2]||fromMatch[1]};
+  work=work.substring(0,fromMatch.index).trim();
+
+  // SELECT (remove SELECT keyword)
+  result.select=work.replace(/^SELECT\s+/i,'').trim();
+
+  return result;
+}
+
+function sbxResolveFrom(from){
+  const tbl=from.table.toLowerCase();
+  if(!sbxDB[tbl]) throw new Error(`Table "${from.table}" not found. Available: ${Object.keys(sbxDB).join(', ')}`);
+  return sbxDB[tbl].map(row=>{
+    const r={};
+    for(const [k,v] of Object.entries(row)){
+      r[k]=v;
+      if(from.alias) r[from.alias+'.'+k]=v;
+    }
+    return r;
+  });
+}
+
+function sbxApplyJoin(rows,join){
+  const tbl=join.table.toLowerCase();
+  if(!sbxDB[tbl]) throw new Error(`Join table "${join.table}" not found`);
+  const rightRows=sbxDB[tbl];
+
+  // Parse ON clause: a.col = b.col
+  const onMatch=join.on.match(/(\w+)\.(\w+)\s*=\s*(\w+)\.(\w+)/);
+  if(!onMatch) throw new Error('Could not parse JOIN ON clause: '+join.on);
+  const lAlias=onMatch[1],lCol=onMatch[2],rAlias=onMatch[3],rCol=onMatch[4];
+
+  const result=[];
+  for(const lRow of rows){
+    const lVal=lRow[lAlias+'.'+lCol]!==undefined?lRow[lAlias+'.'+lCol]:lRow[lCol];
+    for(const rRow of rightRows){
+      if(rRow[rCol]===lVal){
+        const merged={...lRow};
+        for(const [k,v] of Object.entries(rRow)){
+          merged[k]=v;
+          merged[join.alias+'.'+k]=v;
+        }
+        result.push(merged);
+      }
+    }
+  }
+  return result;
+}
+
+function sbxApplyWhere(rows,where){
+  return rows.filter(row=>{
+    try{return sbxEvalCondition(row,where);}catch(e){return false;}
+  });
+}
+
+function sbxEvalCondition(row,cond){
+  // Handle AND/OR
+  const andParts=cond.split(/\bAND\b/i);
+  if(andParts.length>1){
+    return andParts.every(p=>sbxEvalCondition(row,p.trim()));
+  }
+  const orParts=cond.split(/\bOR\b/i);
+  if(orParts.length>1){
+    return orParts.some(p=>sbxEvalCondition(row,p.trim()));
+  }
+
+  // Handle IN
+  const inMatch=cond.match(/^(.+?)\s+IN\s*\((.+)\)$/i);
+  if(inMatch){
+    const val=sbxResolveValue(row,inMatch[1].trim());
+    const list=inMatch[2].split(',').map(s=>s.trim().replace(/^'|'$/g,''));
+    return list.includes(String(val));
+  }
+
+  // Handle LIKE
+  const likeMatch=cond.match(/^(.+?)\s+LIKE\s+'(.+)'$/i);
+  if(likeMatch){
+    const val=String(sbxResolveValue(row,likeMatch[1].trim()));
+    const pattern=likeMatch[2].replace(/%/g,'.*').replace(/_/g,'.');
+    return new RegExp('^'+pattern+'$','i').test(val);
+  }
+
+  // Handle comparison operators
+  const compMatch=cond.match(/^(.+?)\s*(>=|<=|!=|<>|=|>|<)\s*(.+)$/);
+  if(compMatch){
+    let left=sbxResolveValue(row,compMatch[1].trim());
+    let right=sbxResolveValue(row,compMatch[3].trim());
+    const op=compMatch[2];
+    if(typeof left==='number'&&typeof right!=='number') right=parseFloat(right);
+    if(typeof right==='number'&&typeof left!=='number') left=parseFloat(left);
+    switch(op){
+      case '=':return left==right;
+      case '!=':case '<>':return left!=right;
+      case '>':return left>right;
+      case '<':return left<right;
+      case '>=':return left>=right;
+      case '<=':return left<=right;
+    }
+  }
+
+  throw new Error('Unsupported WHERE condition: '+cond);
+}
+
+function sbxResolveValue(row,expr){
+  expr=expr.trim();
+  // String literal
+  if(/^'.*'$/.test(expr)) return expr.slice(1,-1);
+  // Number
+  if(/^-?\d+\.?\d*$/.test(expr)) return parseFloat(expr);
+  // Boolean
+  if(expr.toUpperCase()==='TRUE') return true;
+  if(expr.toUpperCase()==='FALSE') return false;
+  // Column reference (alias.col or col)
+  if(row[expr]!==undefined) return row[expr];
+  // Try without alias
+  const dotIdx=expr.indexOf('.');
+  if(dotIdx>=0){
+    const col=expr.substring(dotIdx+1);
+    if(row[col]!==undefined) return row[col];
+  }
+  return expr;
+}
+
+function sbxApplyGroupBy(rows,selectExpr,groupBy){
+  const groupCols=groupBy.split(',').map(s=>s.trim());
+  const groups={};
+
+  for(const row of rows){
+    const key=groupCols.map(c=>sbxResolveValue(row,c)).join('|||');
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(row);
+  }
+
+  // Parse select expressions for aggregates
+  const selParts=sbxSplitSelect(selectExpr);
+  const result=[];
+
+  for(const [key,groupRows] of Object.entries(groups)){
+    const outRow={};
+    for(const part of selParts){
+      const {expr,alias}=sbxParseSelectExpr(part);
+      const upper=expr.toUpperCase();
+      const aggMatch=upper.match(/^(COUNT|SUM|AVG|MIN|MAX|ROUND)\s*\((.+)\)$/);
+      if(aggMatch){
+        const fn=aggMatch[1];
+        let innerExpr=expr.substring(fn.length+1,expr.length-1).trim();
+        // Handle ROUND(expr, precision)
+        if(fn==='ROUND'){
+          const roundParts=sbxSplitArgs(innerExpr);
+          const innerVal=sbxAggEval(groupRows,roundParts[0].trim());
+          const prec=roundParts.length>1?parseInt(roundParts[1]):0;
+          const name=alias||part.trim();
+          outRow[name]=Math.round(innerVal*Math.pow(10,prec))/Math.pow(10,prec);
+        }else{
+          const vals=groupRows.map(r=>sbxResolveValue(r,innerExpr)).filter(v=>v!==null&&v!==undefined);
+          const name=alias||part.trim();
+          switch(fn){
+            case 'COUNT':outRow[name]=innerExpr.trim()==='*'?groupRows.length:vals.length;break;
+            case 'SUM':outRow[name]=vals.reduce((s,v)=>s+(typeof v==='number'?v:parseFloat(v)||0),0);break;
+            case 'AVG':outRow[name]=vals.length?vals.reduce((s,v)=>s+(typeof v==='number'?v:parseFloat(v)||0),0)/vals.length:0;break;
+            case 'MIN':outRow[name]=Math.min(...vals.map(v=>typeof v==='number'?v:parseFloat(v)));break;
+            case 'MAX':outRow[name]=Math.max(...vals.map(v=>typeof v==='number'?v:parseFloat(v)));break;
+          }
+        }
+      }else if(upper.startsWith('SUM(CASE')){
+        // Handle SUM(CASE WHEN ... THEN 1 ELSE 0 END)
+        const caseMatch=expr.match(/SUM\s*\(\s*CASE\s+WHEN\s+(.+?)\s+THEN\s+(\d+)\s+ELSE\s+(\d+)\s+END\s*\)/i);
+        if(caseMatch){
+          const cond=caseMatch[1];
+          const thenVal=parseInt(caseMatch[2]);
+          const elseVal=parseInt(caseMatch[3]);
+          const name=alias||part.trim();
+          outRow[name]=groupRows.reduce((s,r)=>{
+            try{return s+(sbxEvalCondition(r,cond)?thenVal:elseVal);}catch(e){return s+elseVal;}
+          },0);
+        }
+      }else{
+        // Plain column
+        const name=alias||expr;
+        outRow[name]=sbxResolveValue(groupRows[0],expr);
+      }
+    }
+    result.push(outRow);
+  }
+  return result;
+}
+
+function sbxAggEval(groupRows,expr){
+  const upper=expr.toUpperCase().trim();
+  const aggMatch=upper.match(/^(COUNT|SUM|AVG|MIN|MAX)\s*\((.+)\)$/);
+  if(aggMatch){
+    const fn=aggMatch[1];
+    const innerExpr=expr.substring(fn.length+1,expr.length-1).trim();
+    const vals=groupRows.map(r=>sbxResolveValue(r,innerExpr)).filter(v=>v!==null);
+    switch(fn){
+      case 'COUNT':return innerExpr==='*'?groupRows.length:vals.length;
+      case 'SUM':return vals.reduce((s,v)=>s+(typeof v==='number'?v:parseFloat(v)||0),0);
+      case 'AVG':return vals.length?vals.reduce((s,v)=>s+(typeof v==='number'?v:parseFloat(v)||0),0)/vals.length:0;
+      case 'MIN':return Math.min(...vals.map(v=>typeof v==='number'?v:parseFloat(v)));
+      case 'MAX':return Math.max(...vals.map(v=>typeof v==='number'?v:parseFloat(v)));
+    }
+  }
+  // Try resolving as value from first row
+  return parseFloat(sbxResolveValue(groupRows[0],expr))||0;
+}
+
+function sbxSplitSelect(expr){
+  const parts=[];
+  let depth=0, current='';
+  for(const ch of expr){
+    if(ch==='(') depth++;
+    if(ch===')') depth--;
+    if(ch===','&&depth===0){parts.push(current.trim());current='';}
+    else current+=ch;
+  }
+  if(current.trim()) parts.push(current.trim());
+  return parts;
+}
+
+function sbxSplitArgs(expr){
+  const parts=[];
+  let depth=0, current='';
+  for(const ch of expr){
+    if(ch==='(') depth++;
+    if(ch===')') depth--;
+    if(ch===','&&depth===0){parts.push(current);current='';}
+    else current+=ch;
+  }
+  if(current) parts.push(current);
+  return parts;
+}
+
+function sbxParseSelectExpr(part){
+  const asMatch=part.match(/^(.+?)\s+AS\s+(\w+)\s*$/i);
+  if(asMatch) return {expr:asMatch[1].trim(),alias:asMatch[2]};
+  return {expr:part.trim(),alias:null};
+}
+
+function sbxApplyOrderBy(rows,orderBy){
+  const parts=orderBy.split(',').map(s=>s.trim());
+  const sortKeys=parts.map(p=>{
+    const m=p.match(/^(.+?)\s+(ASC|DESC)$/i);
+    return m?{col:m[1].trim(),desc:m[2].toUpperCase()==='DESC'}:{col:p,desc:false};
+  });
+  return [...rows].sort((a,b)=>{
+    for(const sk of sortKeys){
+      let va=a[sk.col]!==undefined?a[sk.col]:sbxResolveValue(a,sk.col);
+      let vb=b[sk.col]!==undefined?b[sk.col]:sbxResolveValue(b,sk.col);
+      if(typeof va==='string') va=va.toLowerCase();
+      if(typeof vb==='string') vb=vb.toLowerCase();
+      if(va<vb) return sk.desc?1:-1;
+      if(va>vb) return sk.desc?-1:1;
+    }
+    return 0;
+  });
+}
+
+function sbxProjectColumns(rows,selectExpr){
+  if(selectExpr.trim()==='*'){
+    return {rows,columns:rows.length?Object.keys(rows[0]).filter(k=>!k.includes('.')):[]};
+  }
+  const parts=sbxSplitSelect(selectExpr);
+  const columns=[];
+  const projected=rows.map(row=>{
+    const out={};
+    for(const part of parts){
+      const {expr,alias}=sbxParseSelectExpr(part);
+      const upper=expr.toUpperCase();
+
+      // Handle ROUND(expr/col, precision)
+      const roundMatch=expr.match(/^ROUND\s*\((.+?),\s*(\d+)\)$/i);
+      if(roundMatch){
+        const innerVal=sbxResolveValue(row,roundMatch[1].trim());
+        const prec=parseInt(roundMatch[2]);
+        const name=alias||part;
+        out[name]=Math.round((typeof innerVal==='number'?innerVal:parseFloat(innerVal))*Math.pow(10,prec))/Math.pow(10,prec);
+        if(!columns.includes(name)) columns.push(name);
+        continue;
+      }
+
+      // Handle aggregate (shouldn't normally be here without GROUP BY)
+      const aggMatch=upper.match(/^(COUNT|SUM|AVG|MIN|MAX)\s*\(/);
+      if(aggMatch){
+        const name=alias||part;
+        out[name]=0;
+        if(!columns.includes(name)) columns.push(name);
+        continue;
+      }
+
+      const name=alias||expr.split('.').pop();
+      out[name]=sbxResolveValue(row,expr);
+      if(!columns.includes(name)) columns.push(name);
+    }
+    return out;
+  });
+  return {rows:projected,columns};
+}
+
+function sbxRenderResults(rows,columns,elapsed){
+  const scroll=document.getElementById('sbxResultsScroll');
+  const meta=document.getElementById('sbxResultsMeta');
+
+  if(!rows||rows.length===0){
+    scroll.innerHTML='<div class="sbx-msg"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>Query returned no results</div></div>';
+    meta.textContent=`0 rows — ${elapsed}ms`;
+    return;
+  }
+
+  const cols=columns&&columns.length?columns:Object.keys(rows[0]).filter(k=>!k.includes('.'));
+  let html='<table class="sbx-results-table"><thead><tr>';
+  cols.forEach(c=>html+=`<th>${c}</th>`);
+  html+='</tr></thead><tbody>';
+  rows.forEach(row=>{
+    html+='<tr>';
+    cols.forEach(c=>{
+      const v=row[c];
+      if(v===null||v===undefined) html+=`<td class="null-val">NULL</td>`;
+      else if(typeof v==='boolean') html+=`<td style="color:${v?'var(--safe)':'var(--critical)'}">${v}</td>`;
+      else if(typeof v==='number') html+=`<td style="font-variant-numeric:tabular-nums">${v%1===0?v:v.toFixed(3)}</td>`;
+      else html+=`<td>${String(v).substring(0,300)}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  scroll.innerHTML=html;
+  meta.textContent=`${rows.length} row${rows.length!==1?'s':''} — ${elapsed}ms`;
+}
+
+function sbxShowError(msg){
+  document.getElementById('sbxResultsScroll').innerHTML=`<div class="sbx-error">${msg}</div>`;
+  document.getElementById('sbxResultsMeta').textContent='Error';
+}
+
+function sbxAddHistory(sql){
+  sbxQueryHistory.unshift(sql);
+  if(sbxQueryHistory.length>20) sbxQueryHistory.pop();
+  const el=document.getElementById('sbxHistory');
+  el.style.display='block';
+  el.innerHTML=sbxQueryHistory.slice(0,5).map(q=>
+    `<div class="sbx-history-item" onclick="document.getElementById('sbxQuery').value=this.title;sbxRunQuery()" title="${q.replace(/"/g,'&quot;')}">
+      <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      ${q.substring(0,80)}${q.length>80?'...':''}
+    </div>`
+  ).join('');
 }
 
 // ═══ INIT ═══
