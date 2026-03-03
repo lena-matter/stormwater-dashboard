@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>California Stormwater Overflow & Compliance Dashboard</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>California Stormwater Overflow &amp; Compliance Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -19,46 +19,87 @@
   .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
   .topbar h1{font-size:16px;font-weight:700;color:var(--accent)}
   .topbar .ca-badge{background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.5px}
-  .topbar .live{background:var(--critical);color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:10px;animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .topbar .live{background:var(--critical);color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:10px;animation:blink 1.5s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
   .topbar-r{margin-left:auto;display:flex;align-items:center;gap:10px}
-  .topbar-r select,.topbar-r .clock{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:12px}
+  .topbar-r select{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:5px 8px;border-radius:5px;font-size:12px;cursor:pointer}
+  .clock{font-size:13px;font-weight:600;color:var(--dim);font-variant-numeric:tabular-nums}
 
-  .summary{display:flex;gap:6px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
-  .chip{display:flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;background:var(--surface2);border-radius:10px}
-  .chip .d{width:7px;height:7px;border-radius:50%}
-  .compliance-chips{margin-left:auto;display:flex;gap:6px}
-  .cc{font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.3px}
+  .summary{display:flex;align-items:center;gap:10px;padding:6px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text)}
+  .chip .d{width:8px;height:8px;border-radius:50%}
+  .compliance-chips{display:flex;gap:8px;margin-left:auto}
+  .cc{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
   .cc.compliant{background:rgba(34,197,94,.15);color:var(--compliant)}
   .cc.atrisk{background:rgba(245,158,11,.15);color:var(--atrisk)}
   .cc.noncompliant{background:rgba(239,68,68,.15);color:var(--noncompliant)}
 
   .main{display:flex;flex:1;overflow:hidden}
-  .sidebar{width:320px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
-  .sidebar-hdr{padding:12px 14px;border-bottom:1px solid var(--border)}
-  .sidebar-hdr h2{font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
-  .pit-list{flex:1;overflow-y:auto}
-  .pit-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:10px}
+
+  .sidebar{width:300px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+  .sidebar-hdr{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--dim)}
+  .sidebar-hdr h2{font-size:13px;font-weight:600;color:var(--dim)}
+  .pit-list{overflow-y:auto;flex:1}
+  .pit-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
   .pit-item:hover{background:var(--surface2)}
-  .pit-item.active{background:rgba(96,165,250,.08);border-left:3px solid var(--accent)}
+  .pit-item.active{background:var(--surface2);border-left:3px solid var(--accent)}
   .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
   .dot.safe{background:var(--safe)}.dot.filling{background:var(--filling)}.dot.warning{background:var(--warning)}
-  .dot.critical{background:var(--critical);animation:pulse 1s infinite}.dot.overflow{background:var(--overflow);animation:pulse .5s infinite}
+  .dot.critical{background:var(--critical)}.dot.overflow{background:var(--overflow)}
   .pit-info{flex:1;min-width:0}
-  .pit-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pit-name{font-size:13px;font-weight:700}
   .pit-sub{font-size:10px;color:var(--dim)}
-  .pit-badges{display:flex;gap:3px;margin-top:3px}
-  .pit-badge{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600}
+  .pit-badges{display:flex;gap:3px;margin-top:2px}
+  .pit-badge{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:600}
   .pit-badge.pass{background:rgba(34,197,94,.15);color:var(--safe)}
   .pit-badge.fail{background:rgba(239,68,68,.15);color:var(--critical)}
-  .pit-ttf{font-size:11px;font-weight:600;text-align:right;white-space:nowrap}
+  .pit-ttf{font-size:12px;font-weight:700;text-align:right;white-space:nowrap}
   .pit-ttf.safe{color:var(--safe)}.pit-ttf.filling{color:var(--filling)}.pit-ttf.warning{color:var(--warning)}
   .pit-ttf.critical{color:var(--critical)}.pit-ttf.overflow{color:var(--overflow)}
 
   .map-c{flex:1;position:relative}
   #map{width:100%;height:100%}
-  .leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:8px;border:1px solid var(--border)}
-  .leaflet-popup-tip{background:var(--surface)}
+  /* ── Glassmorphism popups & tooltips ── */
+  .leaflet-popup-content-wrapper{
+    background:rgba(21,29,48,.72);
+    backdrop-filter:blur(16px) saturate(1.4);
+    -webkit-backdrop-filter:blur(16px) saturate(1.4);
+    color:var(--text);
+    border-radius:10px;
+    border:1px solid rgba(96,165,250,.18);
+    box-shadow:0 8px 32px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04) inset;
+  }
+  .leaflet-popup-tip{
+    background:rgba(21,29,48,.72);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(96,165,250,.12);
+    box-shadow:none;
+  }
+  .leaflet-popup-content{margin:10px 14px;line-height:1.5}
+  .leaflet-popup-close-button{color:rgba(224,231,241,.5)!important;font-size:18px!important}
+  .leaflet-popup-close-button:hover{color:var(--accent)!important}
+
+  .leaflet-tooltip{
+    background:rgba(21,29,48,.78);
+    backdrop-filter:blur(14px) saturate(1.3);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3);
+    color:var(--text);
+    border:1px solid rgba(96,165,250,.2);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:12px;
+    line-height:1.45;
+    box-shadow:0 6px 24px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.03) inset;
+    font-family:'Inter',-apple-system,sans-serif;
+  }
+  .leaflet-tooltip::before{
+    border-top-color:rgba(21,29,48,.78)!important;
+  }
+  .leaflet-tooltip-top::before{border-top-color:rgba(21,29,48,.78)!important}
+  .leaflet-tooltip-bottom::before{border-bottom-color:rgba(21,29,48,.78)!important}
+  .leaflet-tooltip-left::before{border-left-color:rgba(21,29,48,.78)!important}
+  .leaflet-tooltip-right::before{border-right-color:rgba(21,29,48,.78)!important}
 
   .detail{width:440px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;transition:width .2s}
   .detail.collapsed{width:0;padding:0;border:none;overflow:hidden}
@@ -77,10 +118,8 @@
   .status-banner.critical{background:rgba(239,68,68,.1);color:var(--critical)}
   .status-banner.overflow{background:rgba(220,38,38,.15);color:var(--overflow)}
 
-  /* Compliance cards */
   .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .comp-card{background:var(--surface2);border-radius:6px;padding:8px;border-left:3px solid var(--border)}
-  .comp-card.pass{border-left-color:var(--safe)}
+  .comp-card{background:var(--surface2);border-radius:5px;padding:8px;border-left:3px solid var(--safe)}
   .comp-card.fail{border-left-color:var(--critical)}
   .comp-card .clabel{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.3px}
   .comp-card .cval{font-size:14px;font-weight:700;margin-top:1px}
@@ -99,14 +138,223 @@
   .chart-wrap{background:var(--surface2);border-radius:6px;padding:10px;margin-top:6px}
   .chart-wrap canvas{width:100%!important}
 
-  @media(max-width:1200px){.sidebar{width:260px}.detail{width:360px}}
-  @media(max-width:900px){.main{flex-direction:column}.sidebar{width:100%;height:180px}.detail{width:100%;height:50%}}
+  /* WeatherNext2 badge & ensemble styles */
+  .wn2-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#4285f4,#34a853);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.3px}
+  .wn2-badge svg{width:12px;height:12px}
+  .wn2-info{background:rgba(66,133,244,.08);border:1px solid rgba(66,133,244,.2);border-radius:6px;padding:8px 10px;margin-top:6px;font-size:10px;color:var(--dim);line-height:1.4}
+  .wn2-info strong{color:var(--accent)}
+  .ensemble-spread{display:flex;gap:2px;align-items:flex-end;height:55px;margin-top:6px;position:relative}
+  .ebar{flex:1;border-radius:2px 2px 0 0;min-width:3px;position:relative;display:flex;flex-direction:column;justify-content:flex-end}
+  .ebar .ebar-range{border-radius:2px 2px 0 0;opacity:.25}
+  .ebar .ebar-mean{border-radius:2px 2px 0 0}
+  .ebar .bl{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:7px;color:var(--dim);white-space:nowrap}
+  .ensemble-legend{display:flex;gap:12px;margin-top:18px;font-size:9px;color:var(--dim)}
+  .ensemble-legend span{display:flex;align-items:center;gap:3px}
+  .ensemble-legend .swatch{width:10px;height:6px;border-radius:1px;display:inline-block}
+
+  /* ── StormPilot Photo Portal (popups) ── */
+  .sp-popup{width:320px;font-family:'Inter',-apple-system,sans-serif}
+  .sp-popup-hdr{display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(96,165,250,.12)}
+  .sp-popup-hdr .sp-logo{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center}
+  .sp-popup-hdr .sp-logo svg{width:11px;height:11px;stroke:#fff;fill:none}
+  .sp-popup-hdr .sp-title{font-size:12px;font-weight:700;color:var(--text)}
+  .sp-popup-hdr .sp-id{font-size:10px;color:var(--dim);margin-left:auto}
+  .sp-popup-status{display:flex;gap:6px;margin-bottom:8px}
+  .sp-popup-status .sp-tag{font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px}
+  .sp-popup-status .sp-tag.flow{background:rgba(59,130,246,.15);color:var(--filling)}
+  .sp-popup-status .sp-tag.comp{background:rgba(239,68,68,.15);color:var(--critical)}
+  .sp-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+  .sp-photo-slot{background:var(--surface2);border:1.5px dashed rgba(96,165,250,.25);border-radius:6px;padding:6px;text-align:center;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+  .sp-photo-slot:hover{border-color:var(--accent);background:rgba(96,165,250,.06)}
+  .sp-photo-slot.has-photo{border-style:solid;border-color:var(--safe)}
+  .sp-photo-slot .sp-slot-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--dim);margin-bottom:4px}
+  .sp-photo-slot .sp-slot-icon{width:28px;height:28px;border-radius:50%;background:rgba(96,165,250,.1);display:flex;align-items:center;justify-content:center;margin-bottom:3px}
+  .sp-photo-slot .sp-slot-icon svg{width:14px;height:14px;stroke:var(--accent);fill:none}
+  .sp-photo-slot .sp-slot-hint{font-size:8px;color:var(--dim)}
+  .sp-photo-slot .sp-thumb{width:100%;height:68px;object-fit:cover;border-radius:4px}
+  .sp-photo-slot .sp-photo-time{font-size:8px;color:var(--dim);margin-top:3px}
+  .sp-photo-slot .sp-remove{position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:rgba(239,68,68,.8);color:#fff;font-size:10px;line-height:16px;text-align:center;cursor:pointer;display:none}
+  .sp-photo-slot.has-photo .sp-remove{display:block}
+  .sp-actions{display:flex;gap:5px}
+  .sp-btn{flex:1;padding:6px;border:none;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s}
+  .sp-btn svg{width:12px;height:12px;stroke:currentColor;fill:none}
+  .sp-btn-sync{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff}
+  .sp-btn-sync:hover{filter:brightness(1.15)}
+  .sp-btn-sync.synced{background:linear-gradient(135deg,#22c55e,#16a34a)}
+  .sp-btn-job{background:var(--surface2);color:var(--accent);border:1px solid rgba(96,165,250,.2)}
+  .sp-btn-job:hover{background:rgba(96,165,250,.1)}
+  .sp-sync-status{font-size:8px;color:var(--dim);text-align:center;margin-top:5px}
+  .sp-sync-status .synced{color:var(--safe)}.sp-sync-status .pending{color:var(--warning)}
+
+  /* ── StormPilot Voice Command Bar ── */
+  .sp-voice-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:10px;
+    background:rgba(21,29,48,.88);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+    border:1px solid rgba(96,165,250,.15);border-bottom:none;border-radius:12px 12px 0 0;padding:10px 18px;
+    box-shadow:0 -4px 30px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.03) inset;min-width:520px;transition:all .3s}
+  .sp-voice-bar.listening{border-color:rgba(239,68,68,.4);box-shadow:0 -4px 30px rgba(239,68,68,.15),0 0 0 1px rgba(255,255,255,.03) inset}
+  .sp-voice-brand{display:flex;align-items:center;gap:6px}
+  .sp-voice-brand .sp-v-logo{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sp-voice-brand .sp-v-logo svg{width:16px;height:16px;stroke:#fff;fill:none}
+  .sp-voice-brand .sp-v-name{font-size:13px;font-weight:700;color:var(--text)}
+  .sp-voice-brand .sp-v-sub{font-size:9px;color:var(--dim)}
+  .sp-voice-sep{width:1px;height:28px;background:var(--border);flex-shrink:0}
+  .sp-mic-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative}
+  .sp-mic-btn svg{width:18px;height:18px;stroke:var(--dim);fill:none;transition:stroke .2s}
+  .sp-mic-btn:hover{border-color:var(--accent)}
+  .sp-mic-btn:hover svg{stroke:var(--accent)}
+  .sp-mic-btn.active{border-color:var(--critical);background:rgba(239,68,68,.1);animation:pulse-mic 1.5s infinite}
+  .sp-mic-btn.active svg{stroke:var(--critical)}
+  @keyframes pulse-mic{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)}50%{box-shadow:0 0 0 10px rgba(239,68,68,0)}}
+  .sp-voice-display{flex:1;min-width:0}
+  .sp-voice-transcript{font-size:12px;color:var(--text);min-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sp-voice-transcript.placeholder{color:var(--dim);font-style:italic}
+  .sp-voice-feedback{font-size:10px;color:var(--safe);margin-top:1px;min-height:14px}
+  .sp-voice-feedback.error{color:var(--critical)}
+  .sp-jobs-toggle{padding:5px 10px;border-radius:6px;border:1px solid rgba(96,165,250,.2);background:var(--surface2);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+  .sp-jobs-toggle:hover{background:rgba(96,165,250,.1)}
+  .sp-jobs-toggle .badge{background:var(--accent);color:#0c1222;font-size:8px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px}
+
+  /* ── StormPilot Job Panel ── */
+  .sp-job-panel{position:fixed;bottom:58px;right:20px;z-index:999;width:360px;max-height:420px;
+    background:rgba(21,29,48,.92);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+    border:1px solid rgba(96,165,250,.15);border-radius:12px;
+    box-shadow:0 8px 40px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.03) inset;
+    display:none;flex-direction:column;overflow:hidden}
+  .sp-job-panel.open{display:flex}
+  .sp-job-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .sp-job-hdr h3{font-size:13px;font-weight:700;color:var(--text)}
+  .sp-job-hdr .sp-job-close{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer}
+  .sp-job-list{overflow-y:auto;flex:1;padding:8px}
+  .sp-job-card{background:var(--surface2);border-radius:6px;padding:10px;margin-bottom:6px;border-left:3px solid var(--accent);transition:all .15s}
+  .sp-job-card.urgent{border-left-color:var(--critical)}
+  .sp-job-card.done{border-left-color:var(--safe);opacity:.7}
+  .sp-job-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .sp-job-card-hdr .jid{font-size:11px;font-weight:700;color:var(--text)}
+  .sp-job-card-hdr .jpri{font-size:8px;font-weight:600;padding:2px 5px;border-radius:3px}
+  .sp-job-card-hdr .jpri.high{background:rgba(239,68,68,.15);color:var(--critical)}
+  .sp-job-card-hdr .jpri.med{background:rgba(245,158,11,.15);color:var(--warning)}
+  .sp-job-card-hdr .jpri.low{background:rgba(34,197,94,.15);color:var(--safe)}
+  .sp-job-desc{font-size:10px;color:var(--dim);margin-bottom:4px}
+  .sp-job-meta{display:flex;gap:8px;font-size:9px;color:var(--dim)}
+  .sp-job-meta span{display:flex;align-items:center;gap:3px}
+  .sp-job-empty{text-align:center;padding:30px;color:var(--dim);font-size:12px}
+
+  /* ── Tab Navigation ── */
+  .tab-bar{display:flex;gap:2px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+  .tab-btn{padding:10px 18px;font-size:12px;font-weight:600;color:var(--dim);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+  .tab-btn:hover{color:var(--text);background:rgba(96,165,250,.04)}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
+  .view-container{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .view-panel{display:none;flex:1;overflow:hidden}
+  .view-panel.active{display:flex;flex-direction:column;overflow:hidden}
+
+  /* ── Reporting & Insights View ── */
+  .rpt-view{padding:20px;overflow-y:auto;flex:1;background:var(--bg)}
+  .rpt-section{margin-bottom:24px}
+  .rpt-section h2{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .rpt-section h2 svg{width:16px;height:16px;stroke:var(--accent);fill:none}
+  .rpt-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .rpt-kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;position:relative;overflow:hidden}
+  .rpt-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+  .rpt-kpi.green::before{background:var(--safe)} .rpt-kpi.blue::before{background:var(--accent)}
+  .rpt-kpi.yellow::before{background:var(--warning)} .rpt-kpi.red::before{background:var(--critical)}
+  .rpt-kpi .kpi-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+  .rpt-kpi .kpi-value{font-size:26px;font-weight:800;line-height:1.1}
+  .rpt-kpi .kpi-sub{font-size:10px;color:var(--dim);margin-top:4px}
+  .rpt-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .rpt-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+  .rpt-chart-card h3{font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px}
+  .rpt-chart-card canvas{width:100%!important}
+  .rpt-table{width:100%;border-collapse:collapse;font-size:12px}
+  .rpt-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border)}
+  .rpt-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+  .rpt-table tr:hover td{background:rgba(96,165,250,.03)}
+  .rpt-risk-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+  .rpt-insight-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;border-left:3px solid var(--accent)}
+  .rpt-insight-card.warn{border-left-color:var(--warning)} .rpt-insight-card.crit{border-left-color:var(--critical)}
+  .rpt-insight-card .insight-title{font-size:12px;font-weight:700;margin-bottom:4px}
+  .rpt-insight-card .insight-body{font-size:11px;color:var(--dim);line-height:1.5}
+
+  /* ── StormPilot Full Tab ── */
+  .spt-view{display:flex;flex:1;overflow:hidden;background:var(--bg)}
+  .spt-left{width:380px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);flex-shrink:0;overflow:hidden}
+  .spt-overview{padding:16px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .spt-overview-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .spt-overview-hdr .spt-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .spt-overview-hdr .spt-logo svg{width:20px;height:20px;stroke:#fff;fill:none}
+  .spt-overview-hdr h2{font-size:18px;font-weight:800;color:var(--text)}
+  .spt-overview-hdr .spt-sub{font-size:10px;color:var(--dim)}
+  .spt-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+  .spt-stat{background:var(--surface2);border-radius:8px;padding:10px;text-align:center}
+  .spt-stat .sv{font-size:22px;font-weight:800}
+  .spt-stat .sl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+  .spt-crew-bar{display:flex;gap:6px;flex-wrap:wrap}
+  .spt-crew{display:flex;align-items:center;gap:5px;background:var(--surface2);border-radius:6px;padding:5px 10px;font-size:11px}
+  .spt-crew-avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+  .spt-crew-name{font-weight:600;color:var(--text)}
+  .spt-crew-count{font-size:9px;color:var(--dim)}
+  .spt-add-job-btn{margin-top:12px;width:100%;padding:8px;border:1.5px dashed rgba(96,165,250,.3);border-radius:8px;background:transparent;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .spt-add-job-btn:hover{background:rgba(96,165,250,.06);border-color:var(--accent)}
+  .spt-add-job-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
+
+  /* Kanban Columns */
+  .spt-kanban{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .spt-kanban-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .spt-kanban-hdr h3{font-size:13px;font-weight:700;color:var(--text)}
+  .spt-columns{display:flex;gap:0;flex:1;overflow:hidden}
+  .spt-col{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;min-width:0}
+  .spt-col:last-child{border-right:none}
+  .spt-col-hdr{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0;background:var(--surface)}
+  .spt-col-hdr .col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .spt-col-hdr .col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  .spt-col-hdr .col-count{font-size:9px;color:var(--dim);margin-left:auto;background:var(--surface2);padding:1px 6px;border-radius:8px}
+  .spt-col-body{flex:1;overflow-y:auto;padding:8px;min-height:60px;transition:background .2s}
+  .spt-col-body.drag-over{background:rgba(96,165,250,.06);outline:2px dashed rgba(96,165,250,.3);outline-offset:-4px;border-radius:6px}
+  .spt-dnd-card{background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:6px;border-left:3px solid var(--accent);cursor:grab;transition:all .15s;user-select:none;position:relative}
+  .spt-dnd-card:active{cursor:grabbing}
+  .spt-dnd-card.dragging{opacity:.4;transform:scale(.96)}
+  .spt-dnd-card.urgent{border-left-color:var(--critical)}
+  .spt-dnd-card.done{border-left-color:var(--safe);opacity:.65}
+  .spt-dnd-card .dnd-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .spt-dnd-card .dnd-id{font-size:11px;font-weight:700;color:var(--text)}
+  .spt-dnd-card .dnd-pri{font-size:8px;font-weight:600;padding:2px 5px;border-radius:3px}
+  .spt-dnd-card .dnd-pri.high{background:rgba(239,68,68,.15);color:var(--critical)}
+  .spt-dnd-card .dnd-pri.med{background:rgba(245,158,11,.15);color:var(--warning)}
+  .spt-dnd-card .dnd-pri.low{background:rgba(34,197,94,.15);color:var(--safe)}
+  .spt-dnd-card .dnd-type{font-size:10px;color:var(--dim);margin-bottom:3px}
+  .spt-dnd-card .dnd-meta{display:flex;gap:8px;font-size:9px;color:var(--dim)}
+  .spt-dnd-card .dnd-pit{cursor:pointer;color:var(--accent);font-weight:600}
+  .spt-dnd-card .dnd-assignee{display:flex;align-items:center;gap:3px}
+  .spt-dnd-card .dnd-assignee-dot{width:14px;height:14px;border-radius:50%;font-size:7px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center}
+  .spt-drag-ghost{position:fixed;z-index:9999;pointer-events:none;opacity:.85;transform:rotate(2deg);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+
+  /* Route Map */
+  .spt-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .spt-map-hdr{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0}
+  .spt-map-hdr h3{font-size:13px;font-weight:700;color:var(--text)}
+  .spt-map-hdr .spt-route-badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(139,92,246,.15);color:#a78bfa}
+  .spt-map-hdr .spt-optimize-btn{margin-left:auto;padding:5px 12px;border-radius:6px;border:1px solid rgba(96,165,250,.2);background:var(--surface2);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s}
+  .spt-map-hdr .spt-optimize-btn:hover{background:rgba(96,165,250,.1)}
+  .spt-map-hdr .spt-optimize-btn svg{width:12px;height:12px;stroke:currentColor;fill:none}
+  #spRouteMap{flex:1;width:100%}
+  .spt-route-legend{padding:8px 16px;border-top:1px solid var(--border);display:flex;gap:14px;font-size:10px;color:var(--dim);background:var(--surface);flex-shrink:0}
+  .spt-route-legend span{display:flex;align-items:center;gap:4px}
+  .spt-route-legend .leg-swatch{width:12px;height:3px;border-radius:2px}
+  .spt-route-info{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:16px;background:var(--surface);flex-shrink:0}
+  .spt-route-stat{display:flex;flex-direction:column}
+  .spt-route-stat .rs-val{font-size:16px;font-weight:800;color:var(--accent)}
+  .spt-route-stat .rs-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.3px}
+
+  @media(max-width:1200px){.sidebar{width:260px}.detail{width:360px}.spt-left{width:320px}}
+  @media(max-width:900px){.main{flex-direction:column}.sidebar{width:100%;height:180px}.detail{width:100%;height:50%}.rpt-charts-row{grid-template-columns:1fr}.spt-view{flex-direction:column}.spt-left{width:100%;max-height:50%}.spt-right{min-height:300px}}
+  @media(max-width:600px){.sp-voice-bar{min-width:auto;left:10px;right:10px;transform:none}.sp-job-panel{left:10px;right:10px;width:auto}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <h1>CA Stormwater Overflow & Compliance</h1>
+  <h1>CA Stormwater Overflow &amp; Compliance</h1>
   <span class="ca-badge">NPDES / MS4</span>
   <span class="live">LIVE</span>
   <div class="topbar-r">
@@ -117,31 +365,203 @@
       <option value="SANTA_ANA">Santa Ana (R8)</option>
     </select>
     <select id="fcSel">
-      <option value="current">Current NWS Forecast</option>
+      <option value="wn2_current">WeatherNext2 — Current</option>
+      <option value="wn2_ar">WeatherNext2 — Atmos. River</option>
+      <option value="current">NWS Forecast</option>
       <option value="ar">Atmospheric River</option>
       <option value="moderate">Moderate Storm</option>
       <option value="light">Light Rain</option>
     </select>
+    <span class="wn2-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4m0 12v4m-7.07-15.07l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>WeatherNext2 AI</span>
     <span id="clock" class="clock"></span>
   </div>
 </div>
-<div class="summary" id="summaryStrip"></div>
 
+<div id="summaryStrip" class="summary"></div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabLive" onclick="switchTab('live')">
+    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Live Monitor
+  </button>
+  <button class="tab-btn" id="tabReport" onclick="switchTab('report')">
+    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Reporting &amp; Insights
+  </button>
+  <button class="tab-btn" id="tabStormPilot" onclick="switchTab('stormpilot')" style="gap:5px">
+    <svg viewBox="0 0 24 24" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    StormPilot
+  </button>
+</div>
+
+<div class="view-container">
+<div class="view-panel active" id="viewLive">
 <div class="main">
   <div class="sidebar">
     <div class="sidebar-hdr"><h2>Drain Pits (<span id="pitCount">0</span>)</h2></div>
-    <div class="pit-list" id="pitList"></div>
+    <div id="pitList" class="pit-list"></div>
   </div>
   <div class="map-c"><div id="map"></div></div>
-  <div class="detail collapsed" id="detailPanel">
-    <div class="detail-hdr"><div><h2 id="dTitle">—</h2><div id="dSub" style="font-size:11px;color:var(--dim);margin-top:2px"></div></div><button class="close-btn" onclick="closeDetail()">&times;</button></div>
-    <div class="status-banner" id="sBanner"><div class="sl" id="sLabel">—</div><div class="tl" id="sTTF">—</div></div>
-    <div class="detail-sec"><h3>NPDES Compliance</h3><div class="comp-grid" id="compGrid"></div></div>
-    <div class="detail-sec"><h3>Drain Specifications</h3><div class="spec-grid" id="specGrid"></div></div>
-    <div class="detail-sec"><h3>Forecast Rainfall (2 hr)</h3><div class="forecast-bars" id="fcBars"></div><div style="height:16px"></div></div>
-    <div class="detail-sec"><h3>Predicted Water Level</h3><div class="chart-wrap"><canvas id="cWL"></canvas></div></div>
-    <div class="detail-sec"><h3>Inflow vs Outflow & Design Capacity</h3><div class="chart-wrap"><canvas id="cFlow"></canvas></div></div>
-    <div class="detail-sec"><h3>Time to Overflow</h3><div class="chart-wrap"><canvas id="cTTF"></canvas></div></div>
+  <div id="detailPanel" class="detail collapsed">
+    <div class="detail-hdr">
+      <div><h2 id="dTitle"></h2><div id="dSub" style="font-size:11px;color:var(--dim)"></div></div>
+      <button class="close-btn" onclick="closeDetail()">&times;</button>
+    </div>
+    <div id="sBanner" class="status-banner">
+      <div id="sLabel" class="sl"></div>
+      <div id="sTTF" class="tl"></div>
+    </div>
+    <div class="detail-sec">
+      <h3>NPDES Compliance</h3>
+      <div id="compGrid" class="comp-grid"></div>
+    </div>
+    <div class="detail-sec">
+      <h3>Drain Specifications</h3>
+      <div id="specGrid" class="spec-grid"></div>
+    </div>
+    <div class="detail-sec">
+      <h3 id="fcTitle">Forecast Rainfall (2 hr)</h3>
+      <div id="fcBars" class="forecast-bars"></div>
+      <div id="ensembleSection"></div>
+    </div>
+    <div class="detail-sec">
+      <h3>Predicted Water Level</h3>
+      <div class="chart-wrap"><canvas id="cWL" height="120"></canvas></div>
+    </div>
+    <div class="detail-sec">
+      <h3>Inflow vs Outflow &amp; Design Capacity</h3>
+      <div class="chart-wrap"><canvas id="cFlow" height="120"></canvas></div>
+    </div>
+    <div class="detail-sec">
+      <h3>Time to Overflow</h3>
+      <div class="chart-wrap"><canvas id="cTTF" height="120"></canvas></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /viewLive -->
+
+<div class="view-panel" id="viewReport">
+  <div class="rpt-view" id="rptContent">
+    <div class="rpt-section">
+      <h2><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>Key Performance Indicators</h2>
+      <div class="rpt-kpi-grid" id="rptKPIs"></div>
+    </div>
+    <div class="rpt-section">
+      <h2><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>Status &amp; Compliance Distribution</h2>
+      <div class="rpt-charts-row">
+        <div class="rpt-chart-card"><h3>Flow Status Distribution</h3><canvas id="rptStatusChart" height="220"></canvas></div>
+        <div class="rpt-chart-card"><h3>NPDES Compliance Breakdown</h3><canvas id="rptCompChart" height="220"></canvas></div>
+      </div>
+    </div>
+    <div class="rpt-section">
+      <h2><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>City Performance</h2>
+      <div class="rpt-charts-row">
+        <div class="rpt-chart-card"><h3>Compliance by City</h3><canvas id="rptCityChart" height="280"></canvas></div>
+        <div class="rpt-chart-card"><h3>Avg. Peak Water Level by City (% of Depth)</h3><canvas id="rptCapChart" height="280"></canvas></div>
+      </div>
+    </div>
+    <div class="rpt-section">
+      <h2><svg viewBox="0 0 24 24" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Risk Ranking</h2>
+      <div class="rpt-chart-card" style="overflow-x:auto"><table class="rpt-table" id="rptRiskTable"><thead><tr><th>Rank</th><th>Pit ID</th><th>City</th><th>Status</th><th>TTF</th><th>Peak WL</th><th>NPDES</th><th>Exceedance</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="rpt-section">
+      <h2><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>AI-Generated Insights</h2>
+      <div id="rptInsights"></div>
+    </div>
+  </div>
+</div><!-- /viewReport -->
+
+<div class="view-panel" id="viewStormPilot">
+  <div class="spt-view">
+    <!-- Left: Overview + Kanban -->
+    <div class="spt-left">
+      <div class="spt-overview" id="sptOverview">
+        <div class="spt-overview-hdr">
+          <div class="spt-logo"><svg viewBox="0 0 24 24" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <div><h2>StormPilot</h2><div class="spt-sub">Job Management &amp; Route Planning</div></div>
+        </div>
+        <div class="spt-stats" id="sptStats"></div>
+        <div class="spt-crew-bar" id="sptCrewBar"></div>
+        <button class="spt-add-job-btn" onclick="sptAutoCreateJobs()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Auto-Generate Jobs from Critical Pits
+        </button>
+      </div>
+      <div class="spt-kanban">
+        <div class="spt-kanban-hdr"><h3>Job Board</h3></div>
+        <div class="spt-columns" id="sptColumns">
+          <div class="spt-col" data-status="open">
+            <div class="spt-col-hdr"><div class="col-dot" style="background:var(--accent)"></div><div class="col-title">Open</div><div class="col-count" id="sptColOpen">0</div></div>
+            <div class="spt-col-body" id="sptBodyOpen" ondragover="sptDragOver(event)" ondragleave="sptDragLeave(event)" ondrop="sptDrop(event,'open')"></div>
+          </div>
+          <div class="spt-col" data-status="in_progress">
+            <div class="spt-col-hdr"><div class="col-dot" style="background:var(--warning)"></div><div class="col-title">In Progress</div><div class="col-count" id="sptColProgress">0</div></div>
+            <div class="spt-col-body" id="sptBodyProgress" ondragover="sptDragOver(event)" ondragleave="sptDragLeave(event)" ondrop="sptDrop(event,'in_progress')"></div>
+          </div>
+          <div class="spt-col" data-status="done">
+            <div class="spt-col-hdr"><div class="col-dot" style="background:var(--safe)"></div><div class="col-title">Done</div><div class="col-count" id="sptColDone">0</div></div>
+            <div class="spt-col-body" id="sptBodyDone" ondragover="sptDragOver(event)" ondragleave="sptDragLeave(event)" ondrop="sptDrop(event,'done')"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Right: Route Map -->
+    <div class="spt-right">
+      <div class="spt-map-hdr">
+        <h3>Route Map</h3>
+        <span class="spt-route-badge" id="sptRouteBadge">0 stops</span>
+        <button class="spt-optimize-btn" onclick="sptOptimizeRoute()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Optimize Route
+        </button>
+      </div>
+      <div id="spRouteMap"></div>
+      <div class="spt-route-info" id="sptRouteInfo">
+        <div class="spt-route-stat"><div class="rs-val" id="sptRouteDist">—</div><div class="rs-label">Est. Distance</div></div>
+        <div class="spt-route-stat"><div class="rs-val" id="sptRouteTime">—</div><div class="rs-label">Est. Drive Time</div></div>
+        <div class="spt-route-stat"><div class="rs-val" id="sptRouteStops">0</div><div class="rs-label">Stops</div></div>
+        <div class="spt-route-stat"><div class="rs-val" id="sptRoutePri">—</div><div class="rs-label">Priority Split</div></div>
+      </div>
+      <div class="spt-route-legend">
+        <span><span class="leg-swatch" style="background:#a78bfa"></span>Optimized route</span>
+        <span><span class="leg-swatch" style="background:#ef4444"></span>High priority</span>
+        <span><span class="leg-swatch" style="background:#f59e0b"></span>Medium priority</span>
+        <span><span class="leg-swatch" style="background:#22c55e"></span>Low priority</span>
+      </div>
+    </div>
+  </div>
+</div><!-- /viewStormPilot -->
+</div><!-- /view-container -->
+
+<!-- Hidden file input for photo capture -->
+<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+
+<!-- StormPilot Voice Command Bar -->
+<div class="sp-voice-bar" id="spVoiceBar">
+  <div class="sp-voice-brand">
+    <div class="sp-v-logo"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+    <div><div class="sp-v-name">StormPilot</div><div class="sp-v-sub">Job Management</div></div>
+  </div>
+  <div class="sp-voice-sep"></div>
+  <button class="sp-mic-btn" id="spMicBtn" title="Voice command">
+    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 1a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+  </button>
+  <div class="sp-voice-display">
+    <div class="sp-voice-transcript placeholder" id="spTranscript">Say a command: "create job", "assign PIT-029", "mark complete"...</div>
+    <div class="sp-voice-feedback" id="spFeedback"></div>
+  </div>
+  <button class="sp-jobs-toggle" id="spJobsToggle">Jobs <span class="badge" id="spJobCount">0</span></button>
+</div>
+
+<!-- StormPilot Job Panel -->
+<div class="sp-job-panel" id="spJobPanel">
+  <div class="sp-job-hdr">
+    <h3>StormPilot Jobs</h3>
+    <button class="sp-job-close" onclick="document.getElementById('spJobPanel').classList.remove('open')">&times;</button>
+  </div>
+  <div class="sp-job-list" id="spJobList">
+    <div class="sp-job-empty">No jobs yet. Use voice or click to create.</div>
   </div>
 </div>
 
@@ -152,11 +572,13 @@ const statusColors={safe:'#22c55e',filling:'#3b82f6',warning:'#f59e0b',critical:
 
 class CAEngine {
   constructor(c) {
-    this.W=c.w; this.D=c.d; this.L=c.l; // ft
-    this.pipeDia=c.pipeDia/12; // convert inches to ft
-    this.pipeSlope=c.pipeSlope; this.n=c.n; this.Cd=c.Cd;
-    this.A_ac=c.areaAc; this.C=c.rc; this.impPct=c.impPct;
-    this.p85=c.p85; this.p1yr=c.p1yr;
+    this.W=c.w; this.D=c.d; this.L=c.l;
+    this.pipeDia=c.pipeDia/12;
+    this.pipeSlope=c.pipeSlope;
+    this.n=c.n; this.Cd=c.Cd;
+    this.A_ac=c.areaAc; this.C=c.rc;
+    this.impPct=c.impPct; this.p85=c.p85;
+    this.p1yr=c.p1yr;
     this.preCN=c.preCN||65; this.postCN=c.postCN||85;
     this.SF=c.sf||0.8;
   }
@@ -171,13 +593,10 @@ class CAEngine {
     if(wl<this.pipeDia)return qF*(wl/this.pipeDia);
     return Math.min(this.orificeQ(wl-this.pipeDia/2),qF*1.5);
   }
-  inflow(i_inhr){return this.C*i_inhr*this.A_ac}  // cfs (rational, US)
-
-  // CA compliance
-  wqv(){return this.C*(this.p85/12)*(this.A_ac*43560)}  // ft³
-  trashQ(){return this.C*this.p1yr*this.A_ac}  // cfs
-  hydroRatio(){return 1.2}  // simplified post/pre
-
+  inflow(i_inhr){return this.C*i_inhr*this.A_ac}
+  wqv(){return this.C*(this.p85/12)*(this.A_ac*43560)}
+  trashQ(){return this.C*this.p1yr*this.A_ac}
+  hydroRatio(){return 1.2}
   compliance(){
     const wqvReq=this.wqv(), wqvProv=this.drainVol;
     const trashReq=this.trashQ(), outCap=this.manningQ();
@@ -192,7 +611,6 @@ class CAEngine {
     else if(violations.length===1)status='AT RISK';
     return{wqvReq,wqvProv,wqvOk,trashReq,trashOk,outCap,hydR,hydOk,status,violations};
   }
-
   simulate(profile,substeps=20){
     const results=[];let wl=0;const planA=this.W*this.L;const dtS=RELAY/substeps;
     for(const[dur,intensity]of profile){
@@ -226,39 +644,76 @@ class CAEngine {
 const REGIONS={
   LA:{center:[34.02,-118.28],zoom:11,p85:0.75,p1yr:0.55,label:'Los Angeles (R4)',permit:'R4-2021-0105',
     cities:{'Downtown LA':{lat:34.0407,lng:-118.2468},'Santa Monica':{lat:34.0195,lng:-118.4912},'Torrance':{lat:33.8358,lng:-118.3406},
-            'Long Beach':{lat:33.7701,lng:-118.1937},'Inglewood':{lat:33.9617,lng:-118.3531},'Culver City':{lat:34.0211,lng:-118.3965},
-            'El Segundo':{lat:33.9192,lng:-118.4165},'Hawthorne':{lat:33.9164,lng:-118.3526},'Gardena':{lat:33.8883,lng:-118.3090},
-            'Redondo Beach':{lat:33.8492,lng:-118.3884}}},
+    'Long Beach':{lat:33.7701,lng:-118.1937},'Inglewood':{lat:33.9617,lng:-118.3531},'Culver City':{lat:34.0211,lng:-118.3965},
+    'El Segundo':{lat:33.9192,lng:-118.4165},'Hawthorne':{lat:33.9164,lng:-118.3526},'Gardena':{lat:33.8883,lng:-118.3090},
+    'Redondo Beach':{lat:33.8492,lng:-118.3884}}},
   SF_BAY:{center:[37.56,-122.05],zoom:11,p85:0.60,p1yr:0.42,label:'San Francisco Bay (R2)',permit:'R2-2022-0018',
     cities:{'San Jose':{lat:37.3382,lng:-121.8863},'Fremont':{lat:37.5485,lng:-121.9886},'Hayward':{lat:37.6688,lng:-122.0808},
-            'Sunnyvale':{lat:37.3688,lng:-122.0363},'Santa Clara':{lat:37.3541,lng:-121.9552},'Milpitas':{lat:37.4323,lng:-121.8996},
-            'Mountain View':{lat:37.3861,lng:-122.0839},'Palo Alto':{lat:37.4419,lng:-122.1430},'Redwood City':{lat:37.4852,lng:-122.2364},
-            'San Mateo':{lat:37.5630,lng:-122.3255}}},
+    'Sunnyvale':{lat:37.3688,lng:-122.0363},'Santa Clara':{lat:37.3541,lng:-121.9552},'Milpitas':{lat:37.4323,lng:-121.8996},
+    'Mountain View':{lat:37.3861,lng:-122.0839},'Palo Alto':{lat:37.4419,lng:-122.1430},'Redwood City':{lat:37.4852,lng:-122.2364},
+    'San Mateo':{lat:37.5630,lng:-122.3255}}},
   SAN_DIEGO:{center:[32.82,-117.10],zoom:11,p85:0.52,p1yr:0.48,label:'San Diego (R9)',permit:'R9-2013-0001',
     cities:{'San Diego':{lat:32.7157,lng:-117.1611},'Chula Vista':{lat:32.6401,lng:-117.0842},'Oceanside':{lat:33.1959,lng:-117.3795},
-            'Escondido':{lat:33.1192,lng:-117.0864},'Carlsbad':{lat:33.1581,lng:-117.3506},'El Cajon':{lat:32.7948,lng:-116.9625},
-            'Vista':{lat:33.2000,lng:-117.2425},'Encinitas':{lat:33.0370,lng:-117.2920},'La Mesa':{lat:32.7678,lng:-117.0231},
-            'National City':{lat:32.6781,lng:-117.0992}}},
+    'Escondido':{lat:33.1192,lng:-117.0864},'Carlsbad':{lat:33.1581,lng:-117.3506},'El Cajon':{lat:32.7948,lng:-116.9625},
+    'Vista':{lat:33.2000,lng:-117.2425},'Encinitas':{lat:33.0370,lng:-117.2920},'La Mesa':{lat:32.7678,lng:-117.0231},
+    'National City':{lat:32.6781,lng:-117.0992}}},
   SANTA_ANA:{center:[33.72,-117.83],zoom:11,p85:0.63,p1yr:0.52,label:'Santa Ana (R8)',permit:'R8-2009-0030',
     cities:{'Anaheim':{lat:33.8366,lng:-117.9143},'Santa Ana':{lat:33.7455,lng:-117.8677},'Irvine':{lat:33.6846,lng:-117.8265},
-            'Huntington Beach':{lat:33.6595,lng:-117.9988},'Garden Grove':{lat:33.7743,lng:-117.9379},'Fullerton':{lat:33.8703,lng:-117.9242},
-            'Orange':{lat:33.7879,lng:-117.8531},'Costa Mesa':{lat:33.6412,lng:-117.9187},'Mission Viejo':{lat:33.6000,lng:-117.6720},
-            'Tustin':{lat:33.7458,lng:-117.8262}}},
+    'Huntington Beach':{lat:33.6595,lng:-117.9988},'Garden Grove':{lat:33.7743,lng:-117.9379},'Fullerton':{lat:33.8703,lng:-117.9242},
+    'Orange':{lat:33.7879,lng:-117.8531},'Costa Mesa':{lat:33.6412,lng:-117.9187},'Mission Viejo':{lat:33.6000,lng:-117.6720},
+    'Tustin':{lat:33.7458,lng:-117.8262}}},
 };
 
+// ═══ FORECASTS (NWS + WeatherNext2) ═══
 const FORECASTS={
-  current:{label:'Current NWS',makeProfile:(p85)=>[
-    [10,.08],[10,.25],[10,.55],[10,.95],[10,1.4],[10,1.8],[10,1.2],[10,.65],[10,.3],[10,.1],[10,.04],[10,0]
-  ]},
-  ar:{label:'Atmospheric River',makeProfile:(p85)=>[
-    [10,.2],[10,.6],[10,1.2],[10,2.0],[10,2.8],[10,3.5],[10,2.5],[10,1.5],[10,.8],[10,.3],[10,.1],[10,0]
-  ]},
-  moderate:{label:'Moderate Storm',makeProfile:(p85)=>[
-    [10,.05],[10,.15],[10,.35],[10,.6],[10,.85],[10,.7],[10,.5],[10,.3],[10,.15],[10,.05],[10,0],[10,0]
-  ]},
-  light:{label:'Light Rain',makeProfile:(p85)=>[
-    [10,.02],[10,.08],[10,.15],[10,.25],[10,.32],[10,.25],[10,.15],[10,.08],[10,.03],[10,.01],[10,0],[10,0]
-  ]},
+  // ── WeatherNext2 AI ensemble forecasts ──
+  wn2_current:{label:'WeatherNext2 — Current',isWN2:true,ensemble:8,
+    makeProfile:(p85)=>[
+      [10,.07],[10,.22],[10,.52],[10,.88],[10,1.35],[10,1.72],[10,1.15],[10,.60],[10,.28],[10,.09],[10,.03],[10,0]
+    ],
+    makeEnsemble:(p85)=>{
+      const base=[[10,.07],[10,.22],[10,.52],[10,.88],[10,1.35],[10,1.72],[10,1.15],[10,.60],[10,.28],[10,.09],[10,.03],[10,0]];
+      const members=[];
+      for(let m=0;m<8;m++){
+        const jitter=1+(Math.random()-.5)*.35;
+        const shift=Math.random()*.15-.075;
+        members.push(base.map(([d,i])=>[d,Math.max(0,i*jitter+shift)]));
+      }
+      return members;
+    }
+  },
+  wn2_ar:{label:'WeatherNext2 — Atmos. River',isWN2:true,ensemble:8,
+    makeProfile:(p85)=>[
+      [10,.18],[10,.55],[10,1.15],[10,1.95],[10,2.7],[10,3.4],[10,2.4],[10,1.4],[10,.75],[10,.28],[10,.08],[10,0]
+    ],
+    makeEnsemble:(p85)=>{
+      const base=[[10,.18],[10,.55],[10,1.15],[10,1.95],[10,2.7],[10,3.4],[10,2.4],[10,1.4],[10,.75],[10,.28],[10,.08],[10,0]];
+      const members=[];
+      for(let m=0;m<8;m++){
+        const jitter=1+(Math.random()-.5)*.4;
+        const shift=Math.random()*.2-.1;
+        members.push(base.map(([d,i])=>[d,Math.max(0,i*jitter+shift)]));
+      }
+      return members;
+    }
+  },
+  // ── Classic NWS forecasts ──
+  current:{label:'NWS Forecast',isWN2:false,
+    makeProfile:(p85)=>[
+      [10,.08],[10,.25],[10,.55],[10,.95],[10,1.4],[10,1.8],[10,1.2],[10,.65],[10,.3],[10,.1],[10,.04],[10,0]
+    ]},
+  ar:{label:'Atmospheric River',isWN2:false,
+    makeProfile:(p85)=>[
+      [10,.2],[10,.6],[10,1.2],[10,2.0],[10,2.8],[10,3.5],[10,2.5],[10,1.5],[10,.8],[10,.3],[10,.1],[10,0]
+    ]},
+  moderate:{label:'Moderate Storm',isWN2:false,
+    makeProfile:(p85)=>[
+      [10,.05],[10,.15],[10,.35],[10,.6],[10,.85],[10,.7],[10,.5],[10,.3],[10,.15],[10,.05],[10,0],[10,0]
+    ]},
+  light:{label:'Light Rain',isWN2:false,
+    makeProfile:(p85)=>[
+      [10,.02],[10,.08],[10,.15],[10,.25],[10,.32],[10,.25],[10,.15],[10,.08],[10,.03],[10,.01],[10,0],[10,0]
+    ]},
 };
 
 // ═══ PIT GENERATION ═══
@@ -270,17 +725,19 @@ const PIT_CONFIGS=[
   {suffix:'Residential Neighborhood Inlet',w:3,d:2,l:30,pipeDia:12,pipeSlope:.008,n:.012,Cd:.62,areaAc:3,rc:.65,impPct:55,preCN:70,postCN:78},
 ];
 
-let pits=[], simResults={}, selectedPitId=null, currentRegion='LA', currentForecast='current';
+let pits=[], simResults={}, selectedPitId=null, currentRegion='LA', currentForecast='wn2_current';
 let chartWL,chartFlow,chartTTF, mapMarkers={}, map;
 
 function generatePits(){
   pits=[];
-  const region=REGIONS[currentRegion]; let id=1;
+  const region=REGIONS[currentRegion];
+  let id=1;
   for(const[city,coords]of Object.entries(region.cities)){
     const nP=3+Math.floor(Math.random()*3);
     for(let p=0;p<nP;p++){
       const cfg={...PIT_CONFIGS[p%PIT_CONFIGS.length]};
-      cfg.p85=region.p85; cfg.p1yr=region.p1yr||0.55;
+      cfg.p85=region.p85;
+      cfg.p1yr=region.p1yr||0.55;
       cfg.areaAc=cfg.areaAc+(Math.random()-.5)*2;
       cfg.sf=0.8;
       pits.push({
@@ -302,11 +759,30 @@ function runAll(){
   simResults={};
   for(const pit of pits){
     const profile=fc.makeProfile(region.p85);
-    // Add per-city variation
     const jitter=1+(Math.random()-.5)*.3;
     const adjustedProfile=profile.map(([d,i])=>[d,i*jitter]);
     const engine=new CAEngine(pit.config);
-    simResults[pit.id]={results:engine.simulate(adjustedProfile),compliance:engine.compliance(),engine};
+    const entry={results:engine.simulate(adjustedProfile),compliance:engine.compliance(),engine};
+    // Generate ensemble data for WeatherNext2 forecasts
+    if(fc.isWN2 && fc.makeEnsemble){
+      const ensembleMembers=fc.makeEnsemble(region.p85);
+      entry.ensemble=ensembleMembers.map(memberProfile=>{
+        const adj=memberProfile.map(([d,i])=>[d,i*jitter]);
+        return engine.simulate(adj);
+      });
+      // Compute ensemble stats per timestep
+      const nSteps=entry.results.length;
+      entry.ensembleStats=[];
+      for(let t=0;t<nSteps;t++){
+        const wls=entry.ensemble.map(e=>e[t]?e[t].wl:0);
+        const qIns=entry.ensemble.map(e=>e[t]?e[t].qIn:0);
+        entry.ensembleStats.push({
+          wlMin:Math.min(...wls),wlMax:Math.max(...wls),wlMean:wls.reduce((a,b)=>a+b,0)/wls.length,
+          qInMin:Math.min(...qIns),qInMax:Math.max(...qIns),qInMean:qIns.reduce((a,b)=>a+b,0)/qIns.length,
+        });
+      }
+    }
+    simResults[pit.id]=entry;
   }
 }
 
@@ -321,24 +797,29 @@ function getWorst(pitId){
   return{status:worst.status,ttf:firstTTF,peakWL,minTTF:worst.ttf};
 }
 
-// ═══ MAP ═══
+// ═══ MAP (Lighter tiles) ═══
 function initMap(){
   const region=REGIONS[currentRegion];
   if(map)map.remove();
   map=L.map('map',{zoomControl:true}).setView(region.center,region.zoom);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:19}).addTo(map);
+  // Lighter CARTO Voyager tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    maxZoom:19,subdomains:'abcd'
+  }).addTo(map);
   mapMarkers={};
   for(const pit of pits){
     const info=getWorst(pit.id);const comp=simResults[pit.id].compliance;
     const color=statusColors[info.status]||'#22c55e';
     const sz=info.status==='overflow'||info.status==='critical'?14:10;
-    // Ring color for compliance
     const ring=comp.status==='COMPLIANT'?'#22c55e':comp.status==='AT RISK'?'#f59e0b':'#ef4444';
     const marker=L.marker([pit.lat,pit.lng],{icon:L.divIcon({className:'',
       html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${color};border:2px solid ${ring};box-shadow:0 0 8px ${color}"></div>`,
       iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]})});
     marker.on('click',()=>selectPit(pit.id));
     marker.bindTooltip(`<b>${pit.id}</b><br>${pit.city}<br>Flow: <b>${info.status.toUpperCase()}</b><br>NPDES: <b>${comp.status}</b>`,{direction:'top',offset:[0,-8]});
+    marker.bindPopup(spBuildPopup(pit.id),{maxWidth:360,minWidth:320,className:'sp-leaflet-popup',offset:[0,-6]});
+    marker.on('popupopen',()=>{ marker.getPopup().setContent(spBuildPopup(pit.id)); });
     marker.addTo(map);
     mapMarkers[pit.id]=marker;
   }
@@ -377,6 +858,7 @@ function renderSummary(){
     counts[getWorst(pit.id).status]++;
     compCounts[simResults[pit.id].compliance.status]++;
   }
+  const fc=FORECASTS[currentForecast];
   const strip=document.getElementById('summaryStrip');
   strip.innerHTML=Object.entries(counts).map(([s,c])=>
     `<div class="chip"><div class="d" style="background:${statusColors[s]}"></div>${c} ${s[0].toUpperCase()+s.slice(1)}</div>`
@@ -403,6 +885,8 @@ function renderDetail(){
   const pit=pits.find(p=>p.id===selectedPitId);if(!pit)return;
   const{results,compliance:comp,engine}=simResults[pit.id];
   const info=getWorst(pit.id);
+  const fc=FORECASTS[currentForecast];
+  const isWN2=fc.isWN2;
 
   document.getElementById('dTitle').textContent=pit.id;
   document.getElementById('dSub').textContent=pit.name;
@@ -438,39 +922,105 @@ function renderDetail(){
     ['Impervious',c.impPct,'%'],
   ].map(([l,v,u])=>`<div class="spec-card"><div class="label">${l}</div><div class="value">${v} <span class="unit">${u}</span></div></div>`).join('');
 
-  // Forecast bars
-  const fc=FORECASTS[currentForecast].makeProfile(REGIONS[currentRegion].p85);
-  const maxI=Math.max(...fc.map(f=>f[1]),0.01);
-  document.getElementById('fcBars').innerHTML=fc.map(([d,i],idx)=>{
-    const h=Math.max(2,(i/maxI)*50);
-    const color=i>2?statusColors.critical:i>1?statusColors.warning:i>.5?statusColors.filling:statusColors.safe;
-    return`<div class="fbar" style="height:${h}px;background:${color}" title="${i.toFixed(2)} in/hr">${idx%2===0?`<span class="bl">${idx*10}m</span>`:''}</div>`;
-  }).join('');
+  // Forecast title & bars
+  document.getElementById('fcTitle').textContent=isWN2
+    ? `WeatherNext2 Ensemble Forecast (2 hr) — ${fc.ensemble} members`
+    : 'Forecast Rainfall (2 hr)';
 
-  renderCharts(results,c);
+  const profile=fc.makeProfile(REGIONS[currentRegion].p85);
+  const maxI=Math.max(...profile.map(f=>f[1]),0.01);
+
+  if(isWN2 && fc.makeEnsemble){
+    // Render ensemble spread bars
+    const ensembleMembers=fc.makeEnsemble(REGIONS[currentRegion].p85);
+    const ensMaxI=Math.max(...ensembleMembers.flat().map(([d,i])=>i),0.01);
+    document.getElementById('fcBars').innerHTML=profile.map(([d,i],idx)=>{
+      const memberVals=ensembleMembers.map(m=>m[idx][1]);
+      const minV=Math.min(...memberVals);
+      const maxV=Math.max(...memberVals);
+      const meanV=memberVals.reduce((a,b)=>a+b,0)/memberVals.length;
+      const hRange=Math.max(2,((maxV-minV)/ensMaxI)*50);
+      const hMean=Math.max(1,(meanV/ensMaxI)*50);
+      const hTotal=Math.max(2,(maxV/ensMaxI)*50);
+      const color=meanV>2?statusColors.critical:meanV>1?statusColors.warning:meanV>.5?statusColors.filling:statusColors.safe;
+      return`<div class="ebar" style="height:${hTotal}px">
+        <div class="ebar-range" style="height:${hRange}px;background:${color};position:absolute;bottom:${Math.max(0,(minV/ensMaxI)*50)}px;left:0;right:0"></div>
+        <div class="ebar-mean" style="height:${hMean}px;background:${color}" title="Mean: ${meanV.toFixed(2)} in/hr\nRange: ${minV.toFixed(2)}–${maxV.toFixed(2)}"></div>
+        ${idx%2===0?`<span class="bl">${idx*10}m</span>`:''}
+      </div>`;
+    }).join('');
+    document.getElementById('ensembleSection').innerHTML=`
+      <div class="ensemble-legend">
+        <span><span class="swatch" style="background:var(--filling)"></span>Mean intensity</span>
+        <span><span class="swatch" style="background:var(--filling);opacity:.25"></span>Ensemble spread (min–max)</span>
+      </div>
+      <div class="wn2-info">
+        <strong>WeatherNext2</strong> — Google DeepMind AI ensemble with ${fc.ensemble} probabilistic members.
+        Functional Generative Network produces physically-consistent forecast trajectories at 0.25° resolution, 1-hr temporal steps.
+      </div>`;
+  } else {
+    document.getElementById('fcBars').innerHTML=profile.map(([d,i],idx)=>{
+      const h=Math.max(2,(i/maxI)*50);
+      const color=i>2?statusColors.critical:i>1?statusColors.warning:i>.5?statusColors.filling:statusColors.safe;
+      return`<div class="fbar" style="height:${h}px;background:${color}" title="${i.toFixed(2)} in/hr">${idx%2===0?`<span class="bl">${idx*10}m</span>`:''}</div>`;
+    }).join('');
+    document.getElementById('ensembleSection').innerHTML='';
+  }
+
+  renderCharts(results,c,isWN2,pit.id);
 }
 
-function renderCharts(results,cfg){
+function renderCharts(results,cfg,isWN2,pitId){
   const labels=results.map(r=>r.time);
   const opts={responsive:true,animation:{duration:200},
     plugins:{legend:{labels:{color:'#7b8ba5',font:{size:10}}}},
     scales:{x:{title:{display:true,text:'Time (min)',color:'#7b8ba5'},ticks:{color:'#4a5568'},grid:{color:'#1e2a42'}},
-            y:{ticks:{color:'#4a5568'},grid:{color:'#1e2a42'}}}};
+    y:{ticks:{color:'#4a5568'},grid:{color:'#1e2a42'}}}};
 
-  if(chartWL)chartWL.destroy();
-  chartWL=new Chart(document.getElementById('cWL'),{type:'line',data:{labels,datasets:[
+  const datasets_wl=[
     {label:'Water Level (ft)',data:results.map(r=>r.wl),borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.12)',fill:true,tension:.3,pointRadius:0},
     {label:'Overflow Lip',data:results.map(()=>cfg.d),borderColor:'#ef4444',borderDash:[6,4],pointRadius:0,borderWidth:2},
-  ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'ft',color:'#7b8ba5'}}}}});
+  ];
+  // Add ensemble spread if WeatherNext2
+  if(isWN2 && simResults[pitId].ensembleStats){
+    const stats=simResults[pitId].ensembleStats;
+    datasets_wl.unshift({
+      label:'Ensemble Spread',data:stats.map(s=>s.wlMax),
+      borderColor:'transparent',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.3,pointRadius:0
+    });
+    datasets_wl.push({
+      label:'Ensemble Min',data:stats.map(s=>s.wlMin),
+      borderColor:'rgba(96,165,250,.3)',borderDash:[2,2],tension:.3,pointRadius:0,borderWidth:1,fill:false
+    },{
+      label:'Ensemble Max',data:stats.map(s=>s.wlMax),
+      borderColor:'rgba(96,165,250,.3)',borderDash:[2,2],tension:.3,pointRadius:0,borderWidth:1,fill:false
+    });
+  }
 
-  if(chartFlow)chartFlow.destroy();
-  const engine=new CAEngine(cfg);
-  chartFlow=new Chart(document.getElementById('cFlow'),{type:'line',data:{labels,datasets:[
+  if(chartWL)chartWL.destroy();
+  chartWL=new Chart(document.getElementById('cWL'),{type:'line',data:{labels,datasets:datasets_wl},
+    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'ft',color:'#7b8ba5'}}}}});
+
+  const datasets_flow=[
     {label:'Inflow (cfs)',data:results.map(r=>r.qIn),borderColor:'#f59e0b',tension:.3,pointRadius:0,borderWidth:2},
     {label:'Outflow (cfs)',data:results.map(r=>r.qOut),borderColor:'#22c55e',tension:.3,pointRadius:0,borderWidth:2},
-    {label:'Design Capacity',data:results.map(()=>engine.manningQ()),borderColor:'#a78bfa',borderDash:[4,4],pointRadius:0,borderWidth:1},
-    {label:'Trash FCS Design',data:results.map(()=>engine.trashQ()),borderColor:'#ec4899',borderDash:[2,4],pointRadius:0,borderWidth:1},
-  ]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'cfs',color:'#7b8ba5'}}}}});
+    {label:'Design Capacity',data:results.map(()=>new CAEngine(cfg).manningQ()),borderColor:'#a78bfa',borderDash:[4,4],pointRadius:0,borderWidth:1},
+    {label:'Trash FCS Design',data:results.map(()=>new CAEngine(cfg).trashQ()),borderColor:'#ec4899',borderDash:[2,4],pointRadius:0,borderWidth:1},
+  ];
+  if(isWN2 && simResults[pitId].ensembleStats){
+    const stats=simResults[pitId].ensembleStats;
+    datasets_flow.push({
+      label:'Inflow Range (max)',data:stats.map(s=>s.qInMax),
+      borderColor:'rgba(245,158,11,.3)',borderDash:[2,2],tension:.3,pointRadius:0,borderWidth:1,fill:false
+    },{
+      label:'Inflow Range (min)',data:stats.map(s=>s.qInMin),
+      borderColor:'rgba(245,158,11,.3)',borderDash:[2,2],tension:.3,pointRadius:0,borderWidth:1,fill:false
+    });
+  }
+
+  if(chartFlow)chartFlow.destroy();
+  chartFlow=new Chart(document.getElementById('cFlow'),{type:'line',data:{labels,datasets:datasets_flow},
+    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'cfs',color:'#7b8ba5'}}}}});
 
   if(chartTTF)chartTTF.destroy();
   chartTTF=new Chart(document.getElementById('cTTF'),{type:'line',data:{labels,datasets:[
@@ -489,6 +1039,7 @@ function rebuild(){
   if(selectedPitId&&!pits.find(p=>p.id===selectedPitId)){closeDetail();}
   else if(selectedPitId)renderDetail();
 }
+
 function refreshUI(){
   for(const pit of pits){
     const info=getWorst(pit.id);const comp=simResults[pit.id].compliance;
@@ -504,9 +1055,712 @@ function refreshUI(){
 
 function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 
+// ═══════════════════════════════════════════════
+// ═══ STORMPILOT — Photo Portal & Job Mgmt ═══
+// ═══════════════════════════════════════════════
+
+const spPhotoStore={};   // pitId -> {before:{dataUrl,time}, after:{dataUrl,time}}
+const spJobs=[];          // [{id,pitId,type,priority,desc,status,assignee,created}]
+let spJobIdCounter=1;
+let spActivePhotoSlot=null; // {pitId, slot:'before'|'after'}
+
+// ── Photo helpers ──
+function spGetPhotos(pitId){
+  if(!spPhotoStore[pitId]) spPhotoStore[pitId]={before:null,after:null};
+  return spPhotoStore[pitId];
+}
+function spTimeStr(d){ return d?d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+' '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):''; }
+
+function spTriggerPhoto(pitId,slot){
+  spActivePhotoSlot={pitId,slot};
+  document.getElementById('photoInput').click();
+}
+document.getElementById('photoInput').addEventListener('change',function(e){
+  if(!spActivePhotoSlot||!e.target.files.length)return;
+  const file=e.target.files[0];
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const photos=spGetPhotos(spActivePhotoSlot.pitId);
+    photos[spActivePhotoSlot.slot]={dataUrl:ev.target.result,time:new Date()};
+    // Re-open the popup to refresh content
+    const pit=pits.find(p=>p.id===spActivePhotoSlot.pitId);
+    if(pit && mapMarkers[pit.id]){
+      mapMarkers[pit.id].getPopup().setContent(spBuildPopup(pit.id));
+    }
+    spActivePhotoSlot=null;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+});
+
+function spRemovePhoto(pitId,slot){
+  const photos=spGetPhotos(pitId);
+  photos[slot]=null;
+  const pit=pits.find(p=>p.id===pitId);
+  if(pit && mapMarkers[pitId]){
+    mapMarkers[pitId].getPopup().setContent(spBuildPopup(pitId));
+  }
+}
+
+function spSyncPhotos(pitId){
+  const photos=spGetPhotos(pitId);
+  if(!photos.before && !photos.after){ spShowFeedback('No photos to sync','error'); return; }
+  // Simulate sync to StormPilot mobile
+  const btn=document.querySelector(`.sp-sync-btn-${pitId}`);
+  if(btn){ btn.textContent='Syncing...'; btn.disabled=true; }
+  setTimeout(()=>{
+    photos.synced=true; photos.syncTime=new Date();
+    const pit=pits.find(p=>p.id===pitId);
+    if(pit && mapMarkers[pitId]) mapMarkers[pitId].getPopup().setContent(spBuildPopup(pitId));
+    spShowFeedback(`Photos synced to StormPilot for ${pitId}`);
+  },1200);
+}
+
+// ── Build popup HTML ──
+function spBuildPopup(pitId){
+  const pit=pits.find(p=>p.id===pitId); if(!pit)return'';
+  const info=getWorst(pitId);
+  const comp=simResults[pitId]?simResults[pitId].compliance:{status:'N/A'};
+  const photos=spGetPhotos(pitId);
+  const isSynced=photos.synced;
+  const camSvg='<svg viewBox="0 0 24 24" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+
+  function slotHTML(slot,label){
+    const p=photos[slot];
+    if(p) return `<div class="sp-photo-slot has-photo">
+      <div class="sp-slot-label">${label}</div>
+      <img class="sp-thumb" src="${p.dataUrl}" alt="${label}">
+      <div class="sp-photo-time">${spTimeStr(p.time)}</div>
+      <div class="sp-remove" onclick="event.stopPropagation();spRemovePhoto('${pitId}','${slot}')">&times;</div>
+    </div>`;
+    return `<div class="sp-photo-slot" onclick="spTriggerPhoto('${pitId}','${slot}')">
+      <div class="sp-slot-label">${label}</div>
+      <div class="sp-slot-icon">${camSvg}</div>
+      <div class="sp-slot-hint">Tap to capture</div>
+    </div>`;
+  }
+
+  const syncClass=isSynced?'sp-btn-sync synced':'sp-btn-sync';
+  const syncLabel=isSynced?'Synced':'Sync to StormPilot';
+  const syncIcon=isSynced
+    ?'<svg viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+    :'<svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>';
+  const jobIcon='<svg viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+
+  const statusColor=statusColors[info.status]||'#22c55e';
+  const syncStatus=isSynced?`<span class="synced">Synced ${spTimeStr(photos.syncTime)}</span>`
+    :(photos.before||photos.after)?`<span class="pending">Pending sync</span>`:'';
+
+  return `<div class="sp-popup">
+    <div class="sp-popup-hdr">
+      <div class="sp-logo"><svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div class="sp-title">StormPilot</div>
+      <div class="sp-id">${pit.id} &mdash; ${pit.city}</div>
+    </div>
+    <div class="sp-popup-status">
+      <span class="sp-tag flow" style="background:${statusColor}22;color:${statusColor}">${info.status.toUpperCase()}</span>
+      <span class="sp-tag comp">${comp.status}</span>
+    </div>
+    <div class="sp-photo-grid">
+      ${slotHTML('before','Before')}
+      ${slotHTML('after','After')}
+    </div>
+    <div class="sp-actions">
+      <button class="sp-btn ${syncClass} sp-sync-btn-${pitId}" onclick="event.stopPropagation();spSyncPhotos('${pitId}')">${syncIcon}${syncLabel}</button>
+      <button class="sp-btn sp-btn-job" onclick="event.stopPropagation();spCreateJobFromPopup('${pitId}')">${jobIcon}Create Job</button>
+    </div>
+    ${syncStatus?`<div class="sp-sync-status">${syncStatus}</div>`:''}
+  </div>`;
+}
+
+function spCreateJobFromPopup(pitId){
+  const pit=pits.find(p=>p.id===pitId);if(!pit)return;
+  const info=getWorst(pitId);
+  const priority=info.status==='critical'||info.status==='overflow'?'high':info.status==='warning'?'med':'low';
+  const typeMap={critical:'Emergency inspection',overflow:'Overflow response',warning:'Preventive maintenance',filling:'Routine check',safe:'Scheduled inspection'};
+  spAddJob({pitId,type:typeMap[info.status]||'Inspection',priority,desc:`${pit.name}`,assignee:'Unassigned'});
+  spShowFeedback(`Job created for ${pitId}`);
+}
+
+// ── Job management ──
+function spAddJob(opts){
+  const job={
+    id:`SP-${String(spJobIdCounter++).padStart(4,'0')}`,
+    pitId:opts.pitId, type:opts.type, priority:opts.priority||'med',
+    desc:opts.desc||'', status:'open', assignee:opts.assignee||'Unassigned',
+    created:new Date()
+  };
+  spJobs.unshift(job);
+  spRenderJobs();
+  return job;
+}
+
+function spCompleteJob(jobId){
+  const job=spJobs.find(j=>j.id===jobId);
+  if(job){job.status='done'; spRenderJobs(); spShowFeedback(`${jobId} marked complete`);}
+}
+
+function spRenderJobs(){
+  document.getElementById('spJobCount').textContent=spJobs.filter(j=>j.status==='open').length;
+  const list=document.getElementById('spJobList');
+  if(!spJobs.length){ list.innerHTML='<div class="sp-job-empty">No jobs yet. Use voice or click to create.</div>'; return; }
+  list.innerHTML=spJobs.map(j=>{
+    const priLabel={high:'HIGH',med:'MED',low:'LOW'}[j.priority]||'MED';
+    const cardClass=j.status==='done'?'sp-job-card done':j.priority==='high'?'sp-job-card urgent':'sp-job-card';
+    const doneBtn=j.status==='open'?`<span style="cursor:pointer;color:var(--safe)" onclick="spCompleteJob('${j.id}')">Mark done</span>`:'<span style="color:var(--safe)">Done</span>';
+    return `<div class="${cardClass}">
+      <div class="sp-job-card-hdr"><span class="jid">${j.id}</span><span class="jpri ${j.priority}">${priLabel}</span></div>
+      <div class="sp-job-desc">${j.type} &mdash; ${j.pitId}</div>
+      <div class="sp-job-meta">
+        <span>${j.assignee}</span>
+        <span>${spTimeStr(j.created)}</span>
+        ${doneBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Voice recognition ──
+let spRecognition=null, spIsListening=false;
+
+function spInitVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ document.getElementById('spFeedback').textContent='Speech not supported in this browser'; return; }
+  spRecognition=new SR();
+  spRecognition.continuous=false;
+  spRecognition.interimResults=true;
+  spRecognition.lang='en-US';
+
+  spRecognition.onresult=function(e){
+    let transcript='';
+    for(let i=e.resultIndex;i<e.results.length;i++) transcript+=e.results[i][0].transcript;
+    document.getElementById('spTranscript').textContent=transcript;
+    document.getElementById('spTranscript').classList.remove('placeholder');
+    if(e.results[e.results.length-1].isFinal) spProcessCommand(transcript.trim().toLowerCase());
+  };
+  spRecognition.onend=function(){ spStopListening(); };
+  spRecognition.onerror=function(e){
+    if(e.error!=='no-speech') spShowFeedback('Voice error: '+e.error,'error');
+    spStopListening();
+  };
+}
+
+function spToggleMic(){
+  if(spIsListening) spStopListening();
+  else spStartListening();
+}
+function spStartListening(){
+  if(!spRecognition) spInitVoice();
+  if(!spRecognition) return;
+  spIsListening=true;
+  document.getElementById('spMicBtn').classList.add('active');
+  document.getElementById('spVoiceBar').classList.add('listening');
+  document.getElementById('spTranscript').textContent='Listening...';
+  document.getElementById('spTranscript').classList.remove('placeholder');
+  document.getElementById('spFeedback').textContent='';
+  try{ spRecognition.start(); }catch(e){}
+}
+function spStopListening(){
+  spIsListening=false;
+  document.getElementById('spMicBtn').classList.remove('active');
+  document.getElementById('spVoiceBar').classList.remove('listening');
+  try{ spRecognition.stop(); }catch(e){}
+}
+
+function spShowFeedback(msg,type){
+  const el=document.getElementById('spFeedback');
+  el.textContent=msg;
+  el.className='sp-voice-feedback'+(type==='error'?' error':'');
+  setTimeout(()=>{el.textContent=''},5000);
+}
+
+function spProcessCommand(cmd){
+  // ── Create job ──
+  const createMatch=cmd.match(/(?:create|add|new|open)\s+(?:a\s+)?(?:job|task|work\s*order|ticket)\s*(?:for|on|at)?\s*(pit[- ]?\d+)?/i);
+  if(createMatch){
+    let pitId=createMatch[1]?createMatch[1].replace(/\s|-/g,'').replace(/pit/i,'PIT-').replace('PIT-0','PIT-00').replace(/PIT-(\d)$/,'PIT-00$1').replace(/PIT-(\d\d)$/,'PIT-0$1'):selectedPitId;
+    if(!pitId){spShowFeedback('Please select a pit or say "create job for PIT-029"','error');return;}
+    pitId=pitId.toUpperCase();
+    const pit=pits.find(p=>p.id===pitId);
+    if(!pit){spShowFeedback(`Pit ${pitId} not found`,'error');return;}
+    spCreateJobFromPopup(pitId);
+    return;
+  }
+
+  // ── Assign job ──
+  const assignMatch=cmd.match(/(?:assign|give|set)\s+(?:pit[- ]?\d+|sp[- ]?\d+)\s+(?:to)\s+(.+)/i) || cmd.match(/(?:assign|give|set)\s+(.+?)\s+(?:to)\s+(pit[- ]?\d+|sp[- ]?\d+)/i);
+  if(assignMatch){
+    const name=assignMatch[1].trim();
+    const openJobs=spJobs.filter(j=>j.status==='open');
+    if(openJobs.length){
+      openJobs[0].assignee=name.charAt(0).toUpperCase()+name.slice(1);
+      spRenderJobs();
+      spShowFeedback(`${openJobs[0].id} assigned to ${openJobs[0].assignee}`);
+    } else spShowFeedback('No open jobs to assign','error');
+    return;
+  }
+
+  // ── Mark complete ──
+  const completeMatch=cmd.match(/(?:mark|set|close|complete|finish|done)\s+(?:job|task)?\s*(?:for)?\s*(pit[- ]?\d+|sp[- ]?\d+|complete|done)/i);
+  if(completeMatch || cmd.includes('complete') || cmd.includes('done') || cmd.includes('finish')){
+    const openJobs=spJobs.filter(j=>j.status==='open');
+    if(openJobs.length){
+      spCompleteJob(openJobs[0].id);
+    } else spShowFeedback('No open jobs to complete','error');
+    return;
+  }
+
+  // ── Show jobs ──
+  if(cmd.includes('show job') || cmd.includes('list job') || cmd.includes('open job') || cmd.includes('view job')){
+    document.getElementById('spJobPanel').classList.add('open');
+    spShowFeedback(`${spJobs.filter(j=>j.status==='open').length} open jobs`);
+    return;
+  }
+
+  // ── Select pit ──
+  const pitMatch=cmd.match(/(?:select|go to|show|navigate|open|inspect)\s+(pit[- ]?\d+)/i);
+  if(pitMatch){
+    let pitId=pitMatch[1].replace(/\s|-/g,'').replace(/pit/i,'PIT-').replace('PIT-0','PIT-00').replace(/PIT-(\d)$/,'PIT-00$1').replace(/PIT-(\d\d)$/,'PIT-0$1').toUpperCase();
+    const pit=pits.find(p=>p.id===pitId);
+    if(pit){selectPit(pitId); spShowFeedback(`Navigated to ${pitId}`);}
+    else spShowFeedback(`Pit ${pitId} not found`,'error');
+    return;
+  }
+
+  // ── Status check ──
+  if(cmd.includes('status') || cmd.includes('summary') || cmd.includes('report')){
+    const counts={safe:0,filling:0,warning:0,critical:0,overflow:0};
+    for(const pit of pits) counts[getWorst(pit.id).status]++;
+    spShowFeedback(`${counts.critical} critical, ${counts.warning} warning, ${counts.filling} filling, ${counts.safe} safe`);
+    return;
+  }
+
+  spShowFeedback('Command not recognized. Try: "create job for PIT-029"','error');
+}
+
+// ── Wire up UI events ──
+document.getElementById('spMicBtn').addEventListener('click',spToggleMic);
+document.getElementById('spJobsToggle').addEventListener('click',()=>{
+  document.getElementById('spJobPanel').classList.toggle('open');
+});
+
+// ═══ REPORTING & INSIGHTS ═══
+let rptStatusChart,rptCompChart,rptCityChart,rptCapChart;
+
+function switchTab(tab){
+  ['Live','Report','StormPilot'].forEach(t=>{
+    const key=t.toLowerCase();
+    const el=document.getElementById('tab'+t);
+    const view=document.getElementById('view'+t);
+    if(el) el.classList.toggle('active',tab===key||( tab==='live'&&key==='live')||( tab==='report'&&key==='report')||( tab==='stormpilot'&&key==='stormpilot'));
+    if(view) view.classList.toggle('active',false);
+  });
+  // Simpler approach
+  document.getElementById('tabLive').classList.toggle('active',tab==='live');
+  document.getElementById('tabReport').classList.toggle('active',tab==='report');
+  document.getElementById('tabStormPilot').classList.toggle('active',tab==='stormpilot');
+  document.getElementById('viewLive').classList.toggle('active',tab==='live');
+  document.getElementById('viewReport').classList.toggle('active',tab==='report');
+  document.getElementById('viewStormPilot').classList.toggle('active',tab==='stormpilot');
+  if(tab==='report') renderReporting();
+  if(tab==='stormpilot') renderStormPilotTab();
+}
+
+function renderReporting(){
+  const counts={safe:0,filling:0,warning:0,critical:0,overflow:0};
+  const compCounts={COMPLIANT:0,'AT RISK':0,'NON-COMPLIANT':0};
+  const cityData={};
+  let totalPeakPct=0, worstTTF=Infinity, totalExceedance=0;
+
+  for(const pit of pits){
+    const info=getWorst(pit.id);
+    const sim=simResults[pit.id];
+    const comp=sim.compliance;
+    counts[info.status]++;
+    compCounts[comp.status]++;
+    totalPeakPct+=info.peakWL/pit.config.d;
+    if(info.ttf!==null && info.ttf<worstTTF) worstTTF=info.ttf;
+    const peakExc=Math.max(...sim.results.map(r=>r.exceedance));
+    totalExceedance+=peakExc;
+
+    if(!cityData[pit.city]) cityData[pit.city]={total:0,compliant:0,atRisk:0,nonCompliant:0,peakPct:0,critical:0};
+    const cd=cityData[pit.city];
+    cd.total++;
+    if(comp.status==='COMPLIANT') cd.compliant++;
+    else if(comp.status==='AT RISK') cd.atRisk++;
+    else cd.nonCompliant++;
+    cd.peakPct+=info.peakWL/pit.config.d;
+    if(info.status==='critical'||info.status==='overflow') cd.critical++;
+  }
+
+  const n=pits.length;
+  const complianceRate=((compCounts.COMPLIANT/n)*100).toFixed(1);
+  const avgPeakPct=((totalPeakPct/n)*100).toFixed(0);
+  const critCount=counts.critical+counts.overflow;
+  const avgExc=(totalExceedance/n).toFixed(2);
+
+  // KPIs
+  document.getElementById('rptKPIs').innerHTML=`
+    <div class="rpt-kpi green"><div class="kpi-label">Compliance Rate</div><div class="kpi-value" style="color:var(--safe)">${complianceRate}%</div><div class="kpi-sub">${compCounts.COMPLIANT} of ${n} pits compliant</div></div>
+    <div class="rpt-kpi ${critCount>0?'red':'blue'}"><div class="kpi-label">Critical / Overflow</div><div class="kpi-value" style="color:${critCount>0?'var(--critical)':'var(--safe)'}">${critCount}</div><div class="kpi-sub">${counts.critical} critical, ${counts.overflow} overflow</div></div>
+    <div class="rpt-kpi yellow"><div class="kpi-label">Avg Peak Capacity</div><div class="kpi-value" style="color:${parseInt(avgPeakPct)>80?'var(--critical)':parseInt(avgPeakPct)>50?'var(--warning)':'var(--safe)'}">${avgPeakPct}%</div><div class="kpi-sub">Avg peak water level vs depth</div></div>
+    <div class="rpt-kpi blue"><div class="kpi-label">Worst TTF</div><div class="kpi-value" style="color:${worstTTF<=4?'var(--critical)':worstTTF<=10?'var(--warning)':'var(--safe)'}">${worstTTF===Infinity?'N/A':worstTTF.toFixed(1)+' min'}</div><div class="kpi-sub">Shortest time-to-overflow</div></div>
+    <div class="rpt-kpi blue"><div class="kpi-label">Total Pits Monitored</div><div class="kpi-value" style="color:var(--accent)">${n}</div><div class="kpi-sub">${REGIONS[currentRegion].label}</div></div>
+    <div class="rpt-kpi ${compCounts['NON-COMPLIANT']>0?'red':'green'}"><div class="kpi-label">Non-Compliant</div><div class="kpi-value" style="color:${compCounts['NON-COMPLIANT']>0?'var(--critical)':'var(--safe)'}">${compCounts['NON-COMPLIANT']}</div><div class="kpi-sub">${compCounts['AT RISK']} at risk</div></div>
+    <div class="rpt-kpi yellow"><div class="kpi-label">Avg Exceedance Ratio</div><div class="kpi-value" style="color:${parseFloat(avgExc)>1?'var(--critical)':'var(--safe)'}">${avgExc}x</div><div class="kpi-sub">Peak inflow / design capacity</div></div>
+    <div class="rpt-kpi blue"><div class="kpi-label">Active Forecast</div><div class="kpi-value" style="color:var(--accent);font-size:16px">${FORECASTS[currentForecast].label}</div><div class="kpi-sub">Permit: ${REGIONS[currentRegion].permit}</div></div>
+  `;
+
+  // Status doughnut
+  if(rptStatusChart) rptStatusChart.destroy();
+  rptStatusChart=new Chart(document.getElementById('rptStatusChart'),{type:'doughnut',data:{
+    labels:['Safe','Filling','Warning','Critical','Overflow'],
+    datasets:[{data:[counts.safe,counts.filling,counts.warning,counts.critical,counts.overflow],
+      backgroundColor:['#22c55e','#3b82f6','#f59e0b','#ef4444','#dc2626'],borderColor:'var(--surface)',borderWidth:2}]
+  },options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#7b8ba5',font:{size:11},padding:12}}}}});
+
+  // Compliance doughnut
+  if(rptCompChart) rptCompChart.destroy();
+  rptCompChart=new Chart(document.getElementById('rptCompChart'),{type:'doughnut',data:{
+    labels:['Compliant','At Risk','Non-Compliant'],
+    datasets:[{data:[compCounts.COMPLIANT,compCounts['AT RISK'],compCounts['NON-COMPLIANT']],
+      backgroundColor:['#22c55e','#f59e0b','#ef4444'],borderColor:'var(--surface)',borderWidth:2}]
+  },options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#7b8ba5',font:{size:11},padding:12}}}}});
+
+  // City compliance bar chart
+  const cities=Object.keys(cityData).sort();
+  if(rptCityChart) rptCityChart.destroy();
+  rptCityChart=new Chart(document.getElementById('rptCityChart'),{type:'bar',data:{
+    labels:cities,
+    datasets:[
+      {label:'Compliant',data:cities.map(c=>cityData[c].compliant),backgroundColor:'#22c55e'},
+      {label:'At Risk',data:cities.map(c=>cityData[c].atRisk),backgroundColor:'#f59e0b'},
+      {label:'Non-Compliant',data:cities.map(c=>cityData[c].nonCompliant),backgroundColor:'#ef4444'},
+    ]
+  },options:{responsive:true,indexAxis:'y',plugins:{legend:{labels:{color:'#7b8ba5',font:{size:10}}}},
+    scales:{x:{stacked:true,ticks:{color:'#4a5568'},grid:{color:'#1e2a42'}},y:{stacked:true,ticks:{color:'#7b8ba5',font:{size:10}},grid:{display:false}}}}});
+
+  // City capacity bar chart
+  if(rptCapChart) rptCapChart.destroy();
+  rptCapChart=new Chart(document.getElementById('rptCapChart'),{type:'bar',data:{
+    labels:cities,
+    datasets:[{label:'Avg Peak %',data:cities.map(c=>((cityData[c].peakPct/cityData[c].total)*100).toFixed(1)),
+      backgroundColor:cities.map(c=>{const pct=(cityData[c].peakPct/cityData[c].total)*100;return pct>80?'#ef4444':pct>50?'#f59e0b':'#22c55e'}),borderRadius:3}]
+  },options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},
+    scales:{x:{min:0,max:100,ticks:{color:'#4a5568',callback:v=>v+'%'},grid:{color:'#1e2a42'}},y:{ticks:{color:'#7b8ba5',font:{size:10}},grid:{display:false}}}}});
+
+  // Risk table
+  const pri={overflow:5,critical:4,warning:3,filling:2,safe:1};
+  const ranked=[...pits].sort((a,b)=>{
+    const sa=pri[getWorst(a.id).status],sb=pri[getWorst(b.id).status];
+    if(sb!==sa) return sb-sa;
+    const ta=getWorst(a.id).ttf,tb=getWorst(b.id).ttf;
+    if(ta===null&&tb===null) return 0;
+    if(ta===null) return 1; if(tb===null) return -1;
+    return ta-tb;
+  });
+  document.querySelector('#rptRiskTable tbody').innerHTML=ranked.slice(0,20).map((pit,i)=>{
+    const info=getWorst(pit.id);
+    const comp=simResults[pit.id].compliance;
+    const peakExc=Math.max(...simResults[pit.id].results.map(r=>r.exceedance));
+    const color=statusColors[info.status];
+    return `<tr>
+      <td>${i+1}</td>
+      <td><b style="cursor:pointer;color:var(--accent)" onclick="switchTab('live');selectPit('${pit.id}')">${pit.id}</b></td>
+      <td>${pit.city}</td>
+      <td><span class="rpt-risk-dot" style="background:${color}"></span>${info.status.toUpperCase()}</td>
+      <td>${info.ttf!==null?info.ttf.toFixed(1)+' min':'—'}</td>
+      <td>${info.peakWL.toFixed(2)} / ${pit.config.d} ft</td>
+      <td style="color:${comp.status==='COMPLIANT'?'var(--safe)':comp.status==='AT RISK'?'var(--warning)':'var(--critical)'}">${comp.status}</td>
+      <td style="color:${peakExc>1?'var(--critical)':'var(--safe)'}">${peakExc.toFixed(2)}x</td>
+    </tr>`;
+  }).join('');
+
+  // AI Insights
+  const insights=[];
+  if(critCount>0) insights.push({type:'crit',title:`${critCount} pits in critical/overflow state`,body:`Under the ${FORECASTS[currentForecast].label} scenario, ${critCount} drain pits are at or near capacity. Immediate field inspection recommended for the top-ranked pits. Consider pre-deploying portable pumps to PIT locations with TTF < 4 minutes.`});
+  if(compCounts['NON-COMPLIANT']>0) insights.push({type:'crit',title:`${compCounts['NON-COMPLIANT']} NPDES non-compliant pits`,body:`These pits fail one or more NPDES/MS4 permit requirements (WQV, trash capture, or hydromodification). Non-compliance may result in permit violations under ${REGIONS[currentRegion].permit}. Prioritize retrofit design for pits with WQV deficits.`});
+  if(compCounts['AT RISK']>0) insights.push({type:'warn',title:`${compCounts['AT RISK']} pits at risk of non-compliance`,body:`These pits meet minimum thresholds but have limited margin. Consider proactive upgrades — increasing outlet pipe diameter or adding detention volume — before the next permit cycle.`});
+
+  // City-specific insights
+  for(const[city,cd] of Object.entries(cityData)){
+    if(cd.critical>=2) insights.push({type:'warn',title:`${city}: ${cd.critical} high-risk pits`,body:`${city} has a concentration of critical/overflow pits. This may indicate undersized regional infrastructure. A watershed-level study is recommended.`});
+  }
+
+  if(parseFloat(avgExc)>0.8) insights.push({type:'warn',title:'System-wide capacity stress',body:`The average exceedance ratio of ${avgExc}x indicates that storm inflow is approaching or exceeding design capacity across the network. This suggests the current ${FORECASTS[currentForecast].label} event may overwhelm the system.`});
+  if(parseInt(avgPeakPct)>60) insights.push({type:'warn',title:`High average utilization (${avgPeakPct}%)`,body:`Drain pits across ${REGIONS[currentRegion].label} are averaging ${avgPeakPct}% peak water level. Systems above 60% leave limited freeboard for forecast uncertainty.`});
+
+  if(!insights.length) insights.push({type:'',title:'All systems nominal',body:`No critical issues detected under the current forecast scenario. All monitored pits in ${REGIONS[currentRegion].label} are within safe operating parameters.`});
+
+  document.getElementById('rptInsights').innerHTML=insights.map(ins=>
+    `<div class="rpt-insight-card ${ins.type}"><div class="insight-title">${ins.title}</div><div class="insight-body">${ins.body}</div></div>`
+  ).join('');
+}
+
+// ═══ STORMPILOT FULL TAB ═══
+let spRouteMap=null, spRoutePolyline=null, spRouteMarkers=[];
+const SP_CREWS=[
+  {name:'Alex M.',color:'#3b82f6',initials:'AM'},
+  {name:'Jordan K.',color:'#8b5cf6',initials:'JK'},
+  {name:'Sam T.',color:'#ec4899',initials:'ST'},
+  {name:'Chris R.',color:'#f59e0b',initials:'CR'},
+];
+
+function renderStormPilotTab(){
+  sptRenderOverview();
+  sptRenderKanban();
+  sptInitRouteMap();
+  sptDrawRoute();
+}
+
+function sptRenderOverview(){
+  const open=spJobs.filter(j=>j.status==='open').length;
+  const prog=spJobs.filter(j=>j.status==='in_progress').length;
+  const done=spJobs.filter(j=>j.status==='done').length;
+  const high=spJobs.filter(j=>j.priority==='high'&&j.status!=='done').length;
+
+  document.getElementById('sptStats').innerHTML=`
+    <div class="spt-stat"><div class="sv" style="color:var(--accent)">${open}</div><div class="sl">Open</div></div>
+    <div class="spt-stat"><div class="sv" style="color:var(--warning)">${prog}</div><div class="sl">In Progress</div></div>
+    <div class="spt-stat"><div class="sv" style="color:var(--safe)">${done}</div><div class="sl">Completed</div></div>
+  `;
+
+  // Crew assignments
+  const crewCounts={};
+  for(const j of spJobs){
+    if(j.status==='done') continue;
+    const a=j.assignee||'Unassigned';
+    crewCounts[a]=(crewCounts[a]||0)+1;
+  }
+  document.getElementById('sptCrewBar').innerHTML=SP_CREWS.map(c=>{
+    const cnt=crewCounts[c.name]||0;
+    return `<div class="spt-crew">
+      <div class="spt-crew-avatar" style="background:${c.color}">${c.initials}</div>
+      <div class="spt-crew-name">${c.name}</div>
+      <div class="spt-crew-count">${cnt} job${cnt!==1?'s':''}</div>
+    </div>`;
+  }).join('')+(crewCounts['Unassigned']?`<div class="spt-crew"><div class="spt-crew-avatar" style="background:var(--dim)">?</div><div class="spt-crew-name">Unassigned</div><div class="spt-crew-count">${crewCounts['Unassigned']}</div></div>`:'');
+}
+
+function sptAutoCreateJobs(){
+  const pri={overflow:5,critical:4,warning:3,filling:2,safe:1};
+  const critPits=[...pits].filter(p=>{
+    const s=getWorst(p.id).status;
+    return s==='critical'||s==='overflow'||s==='warning';
+  }).sort((a,b)=>pri[getWorst(b.id).status]-pri[getWorst(a.id).status]);
+
+  let created=0;
+  for(const pit of critPits){
+    if(spJobs.find(j=>j.pitId===pit.id&&j.status!=='done')) continue;
+    const info=getWorst(pit.id);
+    const priority=info.status==='critical'||info.status==='overflow'?'high':'med';
+    const typeMap={critical:'Emergency inspection',overflow:'Overflow response',warning:'Preventive maintenance'};
+    const crew=SP_CREWS[created%SP_CREWS.length];
+    spAddJob({pitId:pit.id,type:typeMap[info.status]||'Inspection',priority,desc:pit.name,assignee:crew.name});
+    created++;
+    if(created>=12) break;
+  }
+  if(created===0) spShowFeedback('No new critical pits need jobs');
+  else spShowFeedback(`${created} jobs auto-generated`);
+  sptRenderOverview();
+  sptRenderKanban();
+  sptDrawRoute();
+}
+
+// ── Kanban rendering ──
+function sptRenderKanban(){
+  const open=spJobs.filter(j=>j.status==='open');
+  const prog=spJobs.filter(j=>j.status==='in_progress');
+  const done=spJobs.filter(j=>j.status==='done');
+
+  document.getElementById('sptColOpen').textContent=open.length;
+  document.getElementById('sptColProgress').textContent=prog.length;
+  document.getElementById('sptColDone').textContent=done.length;
+
+  document.getElementById('sptBodyOpen').innerHTML=open.length?open.map(j=>sptCardHTML(j)).join(''):'<div style="text-align:center;padding:20px;color:var(--dim);font-size:11px">No open jobs</div>';
+  document.getElementById('sptBodyProgress').innerHTML=prog.length?prog.map(j=>sptCardHTML(j)).join(''):'<div style="text-align:center;padding:20px;color:var(--dim);font-size:11px">Drag jobs here</div>';
+  document.getElementById('sptBodyDone').innerHTML=done.length?done.map(j=>sptCardHTML(j)).join(''):'<div style="text-align:center;padding:20px;color:var(--dim);font-size:11px">No completed jobs</div>';
+}
+
+function sptCardHTML(j){
+  const priLabel={high:'HIGH',med:'MED',low:'LOW'}[j.priority]||'MED';
+  const cardCls=j.status==='done'?'done':j.priority==='high'?'urgent':'';
+  const crew=SP_CREWS.find(c=>c.name===j.assignee);
+  const avatarColor=crew?crew.color:'var(--dim)';
+  const avatarInit=crew?crew.initials:'?';
+  return `<div class="spt-dnd-card ${cardCls}" draggable="true" data-job-id="${j.id}"
+    ondragstart="sptDragStart(event,'${j.id}')" ondragend="sptDragEnd(event)">
+    <div class="dnd-hdr"><span class="dnd-id">${j.id}</span><span class="dnd-pri ${j.priority}">${priLabel}</span></div>
+    <div class="dnd-type">${j.type}</div>
+    <div class="dnd-meta">
+      <span class="dnd-pit" onclick="event.stopPropagation();switchTab('live');selectPit('${j.pitId}')">${j.pitId}</span>
+      <span class="dnd-assignee"><span class="dnd-assignee-dot" style="background:${avatarColor}">${avatarInit}</span>${j.assignee}</span>
+      <span>${spTimeStr(j.created)}</span>
+    </div>
+  </div>`;
+}
+
+// ── Drag & Drop engine ──
+let sptDragJobId=null;
+
+function sptDragStart(e,jobId){
+  sptDragJobId=jobId;
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',jobId);
+  setTimeout(()=>{e.target.classList.add('dragging')},0);
+}
+function sptDragEnd(e){
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.spt-col-body').forEach(el=>el.classList.remove('drag-over'));
+  sptDragJobId=null;
+}
+function sptDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  e.currentTarget.classList.add('drag-over');
+}
+function sptDragLeave(e){
+  e.currentTarget.classList.remove('drag-over');
+}
+function sptDrop(e,newStatus){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const jobId=e.dataTransfer.getData('text/plain')||sptDragJobId;
+  if(!jobId) return;
+  const job=spJobs.find(j=>j.id===jobId);
+  if(!job) return;
+  job.status=newStatus;
+  sptRenderKanban();
+  sptRenderOverview();
+  sptDrawRoute();
+  spRenderJobs(); // sync floating panel
+  spShowFeedback(`${jobId} moved to ${newStatus==='in_progress'?'In Progress':newStatus==='done'?'Done':'Open'}`);
+}
+
+// ── Route Map ──
+function sptInitRouteMap(){
+  const container=document.getElementById('spRouteMap');
+  if(!container) return;
+  if(spRouteMap){spRouteMap.invalidateSize();return;}
+  const region=REGIONS[currentRegion];
+  spRouteMap=L.map('spRouteMap',{zoomControl:true}).setView(region.center,region.zoom);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OSM &copy; CARTO',maxZoom:19,subdomains:'abcd'
+  }).addTo(spRouteMap);
+  setTimeout(()=>spRouteMap.invalidateSize(),200);
+}
+
+function sptDrawRoute(){
+  if(!spRouteMap) return;
+  // Clear existing
+  spRouteMarkers.forEach(m=>spRouteMap.removeLayer(m));
+  spRouteMarkers=[];
+  if(spRoutePolyline){spRouteMap.removeLayer(spRoutePolyline);spRoutePolyline=null;}
+
+  // Get active (non-done) jobs with pit coords
+  const activeJobs=spJobs.filter(j=>j.status!=='done');
+  const stops=[];
+  for(const j of activeJobs){
+    const pit=pits.find(p=>p.id===j.pitId);
+    if(pit) stops.push({job:j,pit});
+  }
+
+  document.getElementById('sptRouteBadge').textContent=stops.length+' stop'+(stops.length!==1?'s':'');
+  document.getElementById('sptRouteStops').textContent=stops.length;
+
+  if(!stops.length){
+    document.getElementById('sptRouteDist').textContent='—';
+    document.getElementById('sptRouteTime').textContent='—';
+    document.getElementById('sptRoutePri').textContent='—';
+    return;
+  }
+
+  // Add markers
+  const priColors={high:'#ef4444',med:'#f59e0b',low:'#22c55e'};
+  for(let i=0;i<stops.length;i++){
+    const{job,pit}=stops[i];
+    const color=priColors[job.priority]||'#60a5fa';
+    const marker=L.marker([pit.lat,pit.lng],{icon:L.divIcon({className:'',
+      html:`<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800">${i+1}</div>`,
+      iconSize:[28,28],iconAnchor:[14,14]})});
+    marker.bindTooltip(`<b>${job.id}</b> — ${job.type}<br>${pit.id} (${pit.city})<br>Priority: ${job.priority.toUpperCase()}<br>Assignee: ${job.assignee}`,{direction:'top',offset:[0,-14]});
+    marker.addTo(spRouteMap);
+    spRouteMarkers.push(marker);
+  }
+
+  // Draw polyline
+  const coords=stops.map(s=>[s.pit.lat,s.pit.lng]);
+  if(coords.length>1){
+    spRoutePolyline=L.polyline(coords,{color:'#a78bfa',weight:3,opacity:.8,dashArray:'8,6',smoothFactor:1.5}).addTo(spRouteMap);
+  }
+
+  // Fit bounds
+  if(coords.length) spRouteMap.fitBounds(coords.map(c=>L.latLng(c[0],c[1])),{padding:[40,40]});
+
+  // Stats
+  let totalDist=0;
+  for(let i=1;i<coords.length;i++){
+    totalDist+=L.latLng(coords[i-1]).distanceTo(L.latLng(coords[i]));
+  }
+  const miles=(totalDist/1609.34).toFixed(1);
+  const driveMin=Math.round(totalDist/1609.34*2.5+stops.length*8); // ~2.5 min/mile urban + 8 min/stop
+  document.getElementById('sptRouteDist').textContent=miles+' mi';
+  document.getElementById('sptRouteTime').textContent=driveMin+' min';
+  const hiC=stops.filter(s=>s.job.priority==='high').length;
+  const medC=stops.filter(s=>s.job.priority==='med').length;
+  const loC=stops.filter(s=>s.job.priority==='low').length;
+  document.getElementById('sptRoutePri').textContent=`${hiC}H / ${medC}M / ${loC}L`;
+}
+
+function sptOptimizeRoute(){
+  // Nearest-neighbor greedy optimization
+  const activeJobs=spJobs.filter(j=>j.status!=='done');
+  if(activeJobs.length<2){spShowFeedback('Need at least 2 jobs to optimize');return;}
+
+  // Sort by: high priority first, then nearest neighbor within priority tiers
+  const withCoords=activeJobs.map(j=>{
+    const pit=pits.find(p=>p.id===j.pitId);
+    return pit?{job:j,lat:pit.lat,lng:pit.lng}:null;
+  }).filter(Boolean);
+
+  // Group by priority
+  const groups={high:[],med:[],low:[]};
+  withCoords.forEach(w=>groups[w.job.priority]?groups[w.job.priority].push(w):groups.med.push(w));
+
+  // Nearest-neighbor within each group
+  function nnSort(arr){
+    if(arr.length<=1) return arr;
+    const ordered=[arr.shift()];
+    while(arr.length){
+      const last=ordered[ordered.length-1];
+      let bestIdx=0,bestDist=Infinity;
+      for(let i=0;i<arr.length;i++){
+        const d=Math.hypot(arr[i].lat-last.lat,arr[i].lng-last.lng);
+        if(d<bestDist){bestDist=d;bestIdx=i;}
+      }
+      ordered.push(arr.splice(bestIdx,1)[0]);
+    }
+    return ordered;
+  }
+
+  const optimized=[...nnSort([...groups.high]),...nnSort([...groups.med]),...nnSort([...groups.low])];
+
+  // Re-order spJobs to match optimized order (keep done jobs at end)
+  const doneJobs=spJobs.filter(j=>j.status==='done');
+  const reorderedIds=optimized.map(w=>w.job.id);
+  const reordered=reorderedIds.map(id=>spJobs.find(j=>j.id===id)).filter(Boolean);
+  const otherActive=spJobs.filter(j=>j.status!=='done'&&!reorderedIds.includes(j.id));
+  spJobs.length=0;
+  spJobs.push(...reordered,...otherActive,...doneJobs);
+
+  sptRenderKanban();
+  sptDrawRoute();
+  spShowFeedback('Route optimized: high priority first, nearest-neighbor within tiers');
+}
+
 // ═══ INIT ═══
 generatePits();runAll();initMap();renderSidebar();renderSummary();updateClock();setInterval(updateClock,1000);
-
+spInitVoice();
 // Auto-select worst
 const pri={overflow:5,critical:4,warning:3,filling:2,safe:1};
 const worst=pits.reduce((w,p)=>pri[getWorst(p.id).status]>pri[getWorst(w.id).status]?p:w,pits[0]);
